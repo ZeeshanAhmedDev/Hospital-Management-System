@@ -1,0 +1,31 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    max-width: 700px;
+    margin: auto;
+    border-radius: 10px;
+}
+
+.card-header {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    text-align: center;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: #198754;
+}
+
+.accordion-item {
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.accordion-header {
+    background-color: #f8f9fa;
+}
