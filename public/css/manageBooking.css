@@ -1,0 +1,10 @@
+.table-container {
+    margin: 20px auto;
+    max-width: 1000px;
+}
+.search-bar {
+    margin-bottom: 20px;
+}
+.pagination {
+    justify-content: center;
+}
