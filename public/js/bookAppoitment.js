@@ -1,3 +1,7 @@
+import {app } from '../../src/firebase.js'
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+
 
 document.getElementById('appointmentForm').addEventListener('submit', function (event) {
     event.preventDefault();

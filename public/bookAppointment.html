@@ -54,30 +54,6 @@
         </div>
     </nav>
 
-    <script type="module"
-        src="/src/firebase.js"></script>
-
-        <script type="module">
-            import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
-            // Example: Access the Firebase app initialized in firebase.js
-            import { app } from '/src/firebase.js'; // Ensure the path matches
-
-            // Initialize Firestore
-            const db = getFirestore(app);
-
-            // Example function: Fetch data from Firestore
-            async function fetchData() {
-                const querySnapshot = await getDocs(collection(db, "users"));
-                querySnapshot.forEach((doc) => {
-                    console.log(`${doc.id} =>`, doc.data());
-                });
-            }
-
-            // Call the function
-            fetchData();
-        </script>
-
     <div class="container">
         <div class="card shadow-lg mt-5">
             <div class="card-header bg-primary text-white">
