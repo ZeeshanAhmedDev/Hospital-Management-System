@@ -1,31 +1,27 @@
-// modifying password
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-    apiKey: "AIzaSyDmY1e82vl3RUfj5EtPhC8Zl5RnXm9NrZg"
-import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDmY1e82vl3RUfj5EtPhC8Zl5RnXm9NrZg",
     authDomain: "hospital-management-syst-5db87.firebaseapp.com",
     projectId: "hospital-management-syst-5db87",
-    storageBucket: "hospital-management-syst-5db87.firebasestorage.app",
+    storageBucket: "hospital-management-syst-5db87.firebaseapp.com",
     messagingSenderId: "879885060770",
     appId: "1:879885060770:web:e6c172dfb74d6c15ada5fb"
-  };
-
+};
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const db = getFirestore(app);
 
 // Handle Modify Password Form Submission
 document.getElementById("theModifyPasswordForm").addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const currentPassword = document.getElementById("currentPassword").value;
-    const newPassword = document.getElementById("newPassword").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
+    const currentPassword = document.getElementById("currentPassword").value.trim();
+    const newPassword = document.getElementById("newPassword").value.trim();
+    const confirmPassword = document.getElementById("confirmPassword").value.trim();
 
     // Validate Passwords
     if (newPassword !== confirmPassword) {
@@ -38,22 +34,38 @@ document.getElementById("theModifyPasswordForm").addEventListener("submit", asyn
         return;
     }
 
-    try {
-        const user = auth.currentUser;
+    // Get logged-in user from sessionStorage
+    const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
 
-        if (!user) {
-            alert("No user is signed in.");
+    if (!loggedInUser) {
+        alert("No user is currently logged in.");
+        return;
+    }
+
+    const { email } = loggedInUser;
+
+    try {
+        // Fetch user document from Firestore
+        const userDocRef = doc(db, "users", email);
+        const userDoc = await getDoc(userDocRef);
+
+        if (!userDoc.exists()) {
+            alert("User not found in the database.");
             return;
         }
 
-        // Reauthenticate the user
-        const email = user.email; // Assuming user signed in with email/password
-        const credential = EmailAuthProvider.credential(email, currentPassword);
+        const userData = userDoc.data();
 
-        await reauthenticateWithCredential(user, credential);
+        // Validate current password
+        if (userData.password !== currentPassword) {
+            alert("Current password is incorrect!");
+            return;
+        }
 
-        // Update password
-        await updatePassword(user, newPassword);
+        // Update the user's password in Firestore
+        await updateDoc(userDocRef, {
+            password: newPassword
+        });
 
         alert("Password successfully updated!");
         document.getElementById("theModifyPasswordForm").reset();
@@ -62,4 +74,3 @@ document.getElementById("theModifyPasswordForm").addEventListener("submit", asyn
         alert(error.message);
     }
 });
-

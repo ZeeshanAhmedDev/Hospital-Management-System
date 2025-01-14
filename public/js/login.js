@@ -20,7 +20,7 @@ document.getElementById("loginForm").addEventListener("submit", async (event) =>
     event.preventDefault();
 
     // Collect login credentials
-    const email = document.getElementById("email").value;
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
 
     try {
@@ -40,11 +40,12 @@ document.getElementById("loginForm").addEventListener("submit", async (event) =>
             return;
         }
 
-        // Successful login
-        window.location.href = "index.html";
+        // Save user information to sessionStorage
+        sessionStorage.setItem("loggedInUser", JSON.stringify(userData));
 
-        // Optionally, redirect to another page or store user details in session storage
-        // window.location.href = "dashboard.html";
+        // Redirect to the home page (or dashboard)
+        alert(`Welcome, ${userData.firstName} ${userData.lastName}!`);
+        window.location.href = "index.html";
     } catch (error) {
         console.error("Error during login:", error);
         alert(`Error: ${error.message}`);
