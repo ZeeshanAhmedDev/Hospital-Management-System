@@ -1,4 +1,4 @@
-import { dbRef } from "../../src/firebase.js";
+import { dbRef as db } from "../../src/firebase.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 const bookingTableBody = document.getElementById("bookingTableBody");
