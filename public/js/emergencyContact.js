@@ -1,4 +1,4 @@
-import { db } from "../../src/firebase.js"; // Firebase initialization
+import { dbRef } from "../../src/firebase.js"; // Firebase initialization
 
 import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
