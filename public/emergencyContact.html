@@ -40,7 +40,7 @@
         </div>
     </nav>
 
-    <!-- Emergency Contacts Content (Empty for now) -->
+    
     <div class="container mt-5">
         <div class="card shadow-lg">
             <div class="card-header bg-danger text-white">
@@ -51,7 +51,43 @@
                     <input type="text" id="searchInput" class="form-control" placeholder="Search contacts...">
                 </div>
                 <div class="accordion" id="emergencyContactsAccordion">
-                    <!-- Content will go here in next parts -->
+                   <!-- Hospital Emergency Contacts -->
+<div class="accordion-item">
+    <h2 class="accordion-header" id="hospitalHeading">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#hospitalCollapse" aria-expanded="true" aria-controls="hospitalCollapse">
+            Hospital Emergency Contacts
+        </button>
+    </h2>
+    <div id="hospitalCollapse" class="accordion-collapse collapse show" aria-labelledby="hospitalHeading" data-bs-parent="#emergencyContactsAccordion">
+        <div class="accordion-body">
+            <ul>
+                <li><i class="bi bi-telephone icon"></i><strong>Ambulance Service:</strong> +1-800-123-4567</li>
+                <li><i class="bi bi-building icon"></i><strong>General Inquiries:</strong> +1-800-234-5678</li>
+                <li><i class="bi bi-hospital icon"></i><strong>Emergency Room:</strong> +1-800-345-6789</li>
+                <li><i class="bi bi-heart-pulse icon"></i><strong>Critical Care Unit:</strong> +1-800-456-7890</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Patient-Specific Emergency Contacts -->
+<div class="accordion-item">
+    <h2 class="accordion-header" id="patientHeading">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#patientCollapse" aria-expanded="false" aria-controls="patientCollapse">
+            Patient-Specific Emergency Contacts
+        </button>
+    </h2>
+    <div id="patientCollapse" class="accordion-collapse collapse" aria-labelledby="patientHeading" data-bs-parent="#emergencyContactsAccordion">
+        <div class="accordion-body">
+            <ul>
+                <li><i class="bi bi-person icon"></i><strong>Primary Contact:</strong> John Doe - +1-555-123-4567</li>
+                <li><i class="bi bi-people icon"></i><strong>Secondary Contact:</strong> Jane Doe - +1-555-234-5678</li>
+                <li><i class="bi bi-heart-pulse icon"></i><strong>Family Doctor:</strong> Dr. Smith - +1-555-345-6789</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
                 </div>
             </div>
         </div>
