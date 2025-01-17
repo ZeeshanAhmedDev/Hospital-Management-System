@@ -2,14 +2,12 @@ import { app, auth, onAuthStateChanged, dbRef } from '../../src/firebase.js'
 import { getFirestore, collection, addDoc, doc, getDocs, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 
+const loggedInUser = sessionStorage.getItem("loggedInUser");
 
-async function bookAppointment(user_id, firstName, lastName, email, phone, dob, bookingDate) {
+// Function to write data to Firestore
+async function bookAppointment(firstName, lastName, email, phone, dob, bookingDate) {
     try {
-        // Reference to the user's document in the appointments collection
-        const docRef = doc(dbRef, "appointments", user_id);
-
-        // Set the appointment data (overwrites if exists)
-        await setDoc(docRef, {
+        const docRef = await addDoc(collection(dbRef, "appointments"), {
             firstName,
             lastName,
             email,
@@ -18,10 +16,9 @@ async function bookAppointment(user_id, firstName, lastName, email, phone, dob, 
             bookingDate,
             timestamp: new Date().toISOString()
         });
-
-        console.log("Appointment booked for user:", user_id);
+        console.log("Appointment booked with Successfully");
     } catch (error) {
-        console.error("Error booking appointment:", error);
+        console.error("Error adding appointments:", error);
     }
 }
 
@@ -36,22 +33,14 @@ document.getElementById('appointmentForm').addEventListener('submit', function (
     const dob = document.getElementById('dob').value;
     const bookingDate = document.getElementById('bk_date').value;
 
-    //const user_id ="Hasan";
+    if (loggedInUser) {
 
-    // Get the authenticated user's ID
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            const user_id = user.uid; // Firebase user ID
-            bookAppointment(user_id, firstName, lastName, email, phone, dob, bookingDate);
-        } else {
-            console.error("User not logged in");
-            alert("Please log in to book an appointment.");
-        }
-    });
-
-
-
-
-    // book appointment function called
-    //bookAppointment(user_id, firstName, lastName, email, phone, dob, bookingDate);
+        const userData = JSON.parse(loggedInUser);
+        bookAppointment(firstName, lastName, email, phone, dob, bookingDate);
+    } else {
+        console.log("No logged-in user found in session storage.");
+        alert("Please log in to access this page.");
+        // Redirect to login page if needed
+        window.location.href = "login.html";
+    }
 });
