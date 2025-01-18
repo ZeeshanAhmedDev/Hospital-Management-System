@@ -50,16 +50,18 @@
                         <a class="nav-link"
                             href="emergencyContact.html">Emergency Contact</a>
                     </li>
-    
+
                 </ul>
                 <ul class="navbar-nav">
-    
+
                     <li class="nav-item">
-                        <a class="btn btn-download btn-sm" href="viewprofile.html">View Profile</a>
+                        <a class="btn btn-download btn-sm"
+                            href="viewprofile.html">View Profile</a>
                     </li>
                     <!-- Logout Button -->
                     <li class="nav-item ms-3">
-                        <a id="logoutButton" class="btn btn-danger btn-sm">Logout</a>
+                        <a id="logoutButton"
+                            class="btn btn-danger btn-sm">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -67,7 +69,10 @@
     </nav>
 
     <!-- Carousel -->
-    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel" data-bs-interval="2000">
+    <div id="carouselExampleIndicators"
+        class="carousel slide"
+        data-bs-ride="carousel"
+        data-bs-interval="2000">
         <div class="carousel-indicators">
             <button type="button"
                 data-bs-target="#carouselExampleIndicators"
@@ -124,114 +129,67 @@
 
 
     <!-- DashBoard content -->
-<div class="container-fluid mt-4">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3">
-            <div id="sidebars">   
-                <!-- Will show sidebar as rule specific --> 
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div id="sidebars"
+                class="col-md-3">
+                
             </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="col-md-9">
-            <div class="row">
-                <!-- Cards Section -->
-                <div class="col-md-4">
-                    <div class="card text-white bg-success mb-3">
-                        <div class="card-header">Total Patients</div>
-                        <div class="card-body">
-                            <h5 class="card-title">214</h5>
-                            <p class="card-text">Admitted and Outpatients</p>
+    
+            <!-- Main Content -->
+            <div id="content-wrapper"
+                class="col-md-9">
+                <!-- Default Dashboard Content -->
+                <div id="content">
+                    <div class="row">
+                        <!-- Cards Section -->
+                        <div class="col-md-4">
+                            <div class="card text-white bg-success mb-3">
+                                <div class="card-header">Total Patients</div>
+                                <div class="card-body">
+                                    <h5 class="card-title">214</h5>
+                                    <p class="card-text">Admitted and Outpatients</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-white bg-warning mb-3">
+                                <div class="card-header">Doctors</div>
+                                <div class="card-body">
+                                    <h5 class="card-title">20</h5>
+                                    <p class="card-text">Available Specialists</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-white bg-danger mb-3">
+                                <div class="card-header">Readmission Rate</div>
+                                <div class="card-body">
+                                    <h5 class="card-title">7.01%</h5>
+                                    <p class="card-text">Last Month's Data</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card text-white bg-warning mb-3">
-                        <div class="card-header">Doctors</div>
-                        <div class="card-body">
-                            <h5 class="card-title">20</h5>
-                            <p class="card-text">Available Specialists</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-white bg-danger mb-3">
-                        <div class="card-header">Readmission Rate</div>
-                        <div class="card-body">
-                            <h5 class="card-title">7.01%</h5>
-                            <p class="card-text">Last Month's Data</p>
-                        </div>
-                    </div>
-                </div>
             </div>
-
-            <!-- Table Section -->
-             <!-- TODO: someone use overwrite bootstarp static card 500px -->
-            <div class="card" >
-                <div class="card-header bg-primary text-white">
-                    Patient List
-                </div>
-                <div class="card-body">
-                    <table class="table table-hover">
-                        <thead class="table-dark">
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Age</th>
-                                <th scope="col">Condition</th>
-                                <th scope="col">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th scope="row">1</th>
-                                <td>John Doe</td>
-                                <td>45</td>
-                                <td>Orthopaedics</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary">View</button>
-                                    <button class="btn btn-sm btn-warning">Edit</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">2</th>
-                                <td>Jane Smith</td>
-                                <td>30</td>
-                                <td>Dermatology</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary">View</button>
-                                    <button class="btn btn-sm btn-warning">Edit</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            
         </div>
     </div>
-</div>
+    
+    <!-- Footer -->
+    <footer class="text-center text-white mt-3"
+        style="background-color: #0a4275;">
+        <div class="text-center p-1"
+            style="background-color: rgba(0, 0, 0, 0.2);">
+            © 2024 Copyright:
+            <a class="text-white btn"
+                href="index.html">Hospital Management System</a>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        // Initialize the carousel
-        var myCarousel = document.querySelector('#carouselExampleIndicators'); 
-        var carousel = new bootstrap.Carousel(myCarousel, {
-            interval: 2500,
-            ride: 'carousel'
-        });
-
-        // Logout Functionality
-        document.getElementById("logoutButton").addEventListener("click", function () {
-            // Clear session storage
-            sessionStorage.clear();
-            // Redirect to login page
-            window.location.href = "login.html";
-        });
-    </script>
     <script src="js/main.js"></script>
 </body>
+
 </html>
