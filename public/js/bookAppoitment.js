@@ -40,7 +40,7 @@ document.getElementById('appointmentForm').addEventListener('submit', function (
     } else {
         console.log("No logged-in user found in session storage.");
         alert("Please log in to access this page.");
-        // Redirect to login page if needed
+        // Redirect to login page
         window.location.href = "login.html";
     }
 });
