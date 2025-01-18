@@ -11,7 +11,7 @@ const carousel = new bootstrap.Carousel(myCarousel, {
 
 // Logout Functionality
 const logoutBtn = document.getElementById("logoutButton");
-if(logoutBtn) {
+if (logoutBtn) {
     logoutBtn.addEventListener("click", function () {
         // Clear session storage
         sessionStorage.clear();
@@ -119,21 +119,70 @@ const contentData = {
                 </div>
             `,
     admitpatient: `
-                <h1>Admit Patient</h1>
-                <form>
-                    <div class="mb-3">
-                        <label for="patientName" class="form-label">Patient Name</label>
-                        <input type="text" class="form-control" id="patientName" placeholder="Enter patient name">
-                    </div>
-                    <div class="mb-3">
-                        <label for="patientAge" class="form-label">Patient Age</label>
-                        <input type="number" class="form-control" id="patientAge" placeholder="Enter patient age">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Admit</button>
-                </form>
+    <h2 class="text-center">Admit Patient</h2>
+    <form>
+        <!-- Patient Name -->
+        <div class="mb-3">
+            <label for="patientName" class="form-label">Patient Name</label>
+            <input type="text" class="form-control" id="patientName" placeholder="Enter patient name" required>
+        </div>
+
+        <div class="row">
+            <!-- Patient Date of Birth -->
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="patientDob" class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control" id="patientDob" required>
+                </div>
+            </div>
+
+            <!-- Patient Phone Number -->
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="patientPhone" class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" id="patientPhone" placeholder="Enter phone number" pattern="[0-9]{10}" required>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <!-- Ward Selection -->
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="wardSelection" class="form-label">Ward</label>
+                    <select class="form-select" id="wardSelection" required>
+                        <option value="" disabled selected>Select a ward</option>
+                        <!-- Dropdown options for wards 1-10 -->
+                        ${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">Ward ${i + 1}</option>`).join("")}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Bed Selection -->
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="bedSelection" class="form-label">Bed</label>
+                    <select class="form-select" id="bedSelection" required>
+                        <option value="" disabled selected>Select a bed</option>
+                        <!-- Dropdown options for beds 1-20 -->
+                        ${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">Bed ${i + 1}</option>`).join("")}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Submit Button -->
+        <div class="row">
+            <div class="col text-center">
+                <button type="submit" class="btn btn-primary">Admit</button>
+            </div>
+        </div>
+    </form>
             `,
     viewpatients: `
-                <h1>Patient List</h1>
+                <h2>Patient List</h2>
                 <table class="table table-hover">
                     <thead class="table-dark">
                         <tr>
@@ -141,6 +190,8 @@ const contentData = {
                             <th>Name</th>
                             <th>Age</th>
                             <th>Condition</th>
+                            <th>Ward</th>
+                            <th>Bed</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -149,28 +200,57 @@ const contentData = {
                             <td>1</td>
                             <td>John Doe</td>
                             <td>45</td>
-                            <td>Orthopaedics</td>
+                            <td>Admitted</td>
+                            <td>01</td>
+                            <td>01</td>
                             <td>
-                                <button class="btn btn-sm btn-primary">View</button>
-                                <button class="btn btn-sm btn-warning">Edit</button>
+                            <button class="btn btn-sm btn-warning">Edit</button>
+                            <button class="btn btn-sm btn-primary">Delete</button>
                             </td>
                         </tr>
                         <tr>
                             <td>2</td>
                             <td>Jane Smith</td>
                             <td>30</td>
-                            <td>Dermatology</td>
+                            <td>Discharged</td>
+                            <td>01</td>
+                            <td>02</td>
                             <td>
-                                <button class="btn btn-sm btn-primary">View</button>
-                                <button class="btn btn-sm btn-warning">Edit</button>
+                            <button class="btn btn-sm btn-warning">Edit</button>
+                            <button class="btn btn-sm btn-primary">Delete</button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             `,
     managewardandbeds: `
-                <h1>Manage Ward and Beds</h1>
-                <p>Ward and Bed management functionality goes here.</p>
+                <h2>Manage Ward and Beds</h2>
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Condition</th>
+                            <th>Ward</th>
+                            <th>Bed</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>John Doe</td>
+                            <td>45</td>
+                            <td>Admitted</td>
+                            <td>01</td>
+                            <td>01</td>
+                            <td>
+                            <button class="btn btn-sm btn-warning">Edit</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             `,
     appointments: `
                 <h1>Appointments</h1>
@@ -180,8 +260,34 @@ const contentData = {
                 <h1>Patients Medical Records</h1>
                 <p>Medical Records.</p>
             `,
+    manageshifts: `
+                <h2>Manage Shifts</h2>
+                     <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Day</th>
+                                        <th scope="col">Start Time</th>
+                                        <th scope="col">Finish Time</th>
+                                        <th scope="col">Shift Type</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Tuesday</td>
+                                        <td>15:00</td>
+                                        <td>20:00</td>
+                                        <td>Normal</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-warning">Edit</button>
+                                        </td>
+                                    </tr>
+                                    <!-- Additional rows can be added dynamically here -->
+                                </tbody>
+                            </table>
+            `,
     bookedappointments: `
-                <h1>Patients Booked Appointments</h1>
+                <h2>Patients Booked Appointments</h2>
                 <p>Ward and Bed management functionality goes here.</p>
             `,
 };
