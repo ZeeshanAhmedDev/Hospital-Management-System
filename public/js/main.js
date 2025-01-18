@@ -22,10 +22,6 @@ if (logoutBtn) {
 
 
 
-
-
-
-
 const loggedInUser = sessionStorage.getItem("loggedInUser");
 
 const loadPatientSideBars = () => {
@@ -59,8 +55,6 @@ if (loggedInUser) {
     // Redirect to login page
     window.location.href = "login.html";
 }
-
-
 
 
 setTimeout(() => {
@@ -251,10 +245,6 @@ const contentData = {
                         </tr>
                     </tbody>
                 </table>
-            `,
-    appointments: `
-                <h1>Appointments</h1>
-                <p>View and manage appointments here.</p>
             `,
     medicalrecords: `
                 <h1>Patients Medical Records</h1>
