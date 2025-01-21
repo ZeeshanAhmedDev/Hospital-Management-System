@@ -29,6 +29,8 @@ const loadPatientSideBars = () => {
         .then(response => response.text())
         .then(data => {
             document.getElementById('sidebars').innerHTML = data;
+            // Initialize sidebar
+            initializeSidebarNavigation();
         }).catch(err => console.log("Error loading sidebar bar: " + err));
 }
 
@@ -37,6 +39,8 @@ const loadStaffSideBars = () => {
         .then(response => response.text())
         .then(data => {
             document.getElementById('sidebars').innerHTML = data;
+            // Initialize sidebar
+            initializeSidebarNavigation();
         }).catch(err => console.log("Error loading sidebar bar: " + err));
 }
 
@@ -57,28 +61,42 @@ if (loggedInUser) {
 }
 
 
-setTimeout(() => {
-    // Sidebar navigation
-    document.querySelectorAll("#sidebars .list-group-item").forEach(item => {
-        console.log(item)
+const initializeSidebarNavigation = () => {
+    const sidebarItems = document.querySelectorAll("#sidebars .list-group-item");
+    const contentWrapper = document.getElementById("content");
+
+    if (!sidebarItems.length) {
+        console.error("No sidebar items found. Check your selector!");
+        return;
+    }
+
+    if (!contentWrapper) {
+        console.error("Content wrapper not found!");
+        return;
+    }
+
+    sidebarItems.forEach(item => {
         item.addEventListener("click", function (e) {
             e.preventDefault();
-
-            // Remove active class from all links
-            document.querySelectorAll("#sidebars .list-group-item").forEach(link => link.classList.remove("active"));
-
-            // Add active class to the clicked link
+            sidebarItems.forEach(link => link.classList.remove("active"));
             this.classList.add("active");
 
-            // Update main content
+            // Update main content dynamically
             const section = this.textContent.trim().toLowerCase().replace(/\s+/g, '');
-            console.log(section)
-            const contentWrapper = document.getElementById("content");
-            console.log(contentWrapper)
+            console.log("Mapped section:", section);
             contentWrapper.innerHTML = contentData[section] || "<h1>Content Not Found</h1>";
         });
     });
-}, "1000");
+
+    // default Dashboard)
+    const defaultSection = sidebarItems[0]?.textContent.trim().toLowerCase().replace(/\s+/g, '');
+    console.log("Default section:", defaultSection);
+    if (defaultSection) {
+        contentWrapper.innerHTML = contentData[defaultSection] || "<h1>Welcome to the Dashboard</h1>";
+        sidebarItems[0]?.classList.add("active");
+    }
+};
+
 
 const contentData = {
     dashboard: `
