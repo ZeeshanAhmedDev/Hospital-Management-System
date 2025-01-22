@@ -95,12 +95,13 @@ const contentData = {
             `,
     viewpatients: `
                 <h2>Patient List</h2>
-                <table class="table table-hover">
+                <table class="table table-hover patient-table">
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
                             <th>Name</th>
                             <th>Age</th>
+                            <th>Phone</th>
                             <th>Condition</th>
                             <th>Ward</th>
                             <th>Bed</th>
@@ -108,30 +109,6 @@ const contentData = {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>John Doe</td>
-                            <td>45</td>
-                            <td>Admitted</td>
-                            <td>01</td>
-                            <td>01</td>
-                            <td>
-                            <button class="btn btn-sm btn-warning">Edit</button>
-                            <button class="btn btn-sm btn-primary">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Jane Smith</td>
-                            <td>30</td>
-                            <td>Discharged</td>
-                            <td>01</td>
-                            <td>02</td>
-                            <td>
-                            <button class="btn btn-sm btn-warning">Edit</button>
-                            <button class="btn btn-sm btn-primary">Delete</button>
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
             `,

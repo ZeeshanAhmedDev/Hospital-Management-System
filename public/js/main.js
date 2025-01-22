@@ -100,6 +100,8 @@ const updateContentAndInitialize = (section) => {
 
     if (section === "admitpatient") {
         initializeFormSubmission(); // Initialize form submission handling
+    } else if (section === "viewpatients") {
+        fetchAndRenderPatients();
     }
 };
 
@@ -130,33 +132,58 @@ const initializeFormSubmission = () => {
         }
 
         admitPatientFunc(patientName, patientDob, patientPhone, wardSelection, bedSelection, admitForm);
-        fetch("/admit-patient", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                patientName,
-                patientDob,
-                patientPhone,
-                wardSelection,
-                bedSelection,
-            }),
-        })
-            .then((response) => {
-                if (response.ok) {
-                    alert("Patient admitted successfully!");
-                } else {
-                    alert("Failed to admit patient.");
-                }
-            })
-            .catch((error) => console.error("Error admitting patient:", error));
-        */
     });
 };
 
+const fetchAndRenderPatients = async () => {
+    const tableBody = document.querySelector("table.patient-table tbody");
+
+    if (!tableBody) {
+        console.error("Table body not found!");
+        return;
+    }
+
+    fetchPatients(tableBody);
+};
+
+
+const fetchPatients = async(tableBody) => {
+    const querySnapshot = await getDocs(collection(dbRef, "AdmittedPatients"));
+    // Clear existing content
+    tableBody.innerHTML = ""; 
+    if (querySnapshot.empty) {
+        tableBody.innerHTML = `<tr><td colspan="7" class="text-center">No patients found.</td></tr>`;
+        return;
+    }
+    let counter = 1;
+    querySnapshot.forEach((doc) => {
+        const patient = doc.data();
+        const row = `
+            <tr>
+                <td>${counter++}</td>
+                <td>${patient.patientName || "N/A"}</td>
+                <td>${patient.patientDob || "N/A"}</td>
+                <td>${patient.patientPhone || "N/A"}</td>
+                <td>${patient.typeOfPatient || "N/A"}</td>
+                <td>${patient.wardSelection || "N/A"}</td>
+                <td>${patient.bedSelection || "N/A"}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning edit-patient" data-id="${doc.id}">Edit</button>
+                    <button class="btn btn-sm btn-primary delete-patient" data-id="${doc.id}">Delete</button>
+                </td>
+            </tr>
+        `;
+        tableBody.innerHTML += row;
+
+        
+    });
+}
+
+
+
 
 const admitPatientFunc = async (patientName, patientDob, patientPhone, wardSelection, bedSelection, admitForm) => {
+    const typeOfPatient = "Admitted";
     try {
         const docRef = await addDoc(collection(dbRef, "AdmittedPatients"), {
             patientName,
@@ -164,6 +191,7 @@ const admitPatientFunc = async (patientName, patientDob, patientPhone, wardSelec
             patientPhone,
             wardSelection,
             bedSelection,
+            typeOfPatient,
             timestamp: new Date().toISOString()
         });
         admitForm.reset();
