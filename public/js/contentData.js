@@ -114,7 +114,7 @@ const contentData = {
             `,
     managewardandbeds: `
                 <h2>Manage Ward and Beds</h2>
-                <table class="table table-hover">
+                <table class="table table-hover manage-ward-table">
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
@@ -127,17 +127,7 @@ const contentData = {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>John Doe</td>
-                            <td>45</td>
-                            <td>Admitted</td>
-                            <td>01</td>
-                            <td>01</td>
-                            <td>
-                            <button class="btn btn-sm btn-warning">Edit</button>
-                            </td>
-                        </tr>
+                        
                     </tbody>
                 </table>
             `,
