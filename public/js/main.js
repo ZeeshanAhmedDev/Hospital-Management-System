@@ -52,8 +52,13 @@ const loadPatientModal = () => {
     fetch('./patientModal.html')
         .then(response => response.text())
         .then(data => {
-            // document.getElementById('sidebars').innerHTML = data;
-            //console.log(data)
+            document.body.insertAdjacentHTML('beforeend', data);
+        }).catch(err => console.log("Error loading sidebar bar: " + err));
+}
+const loadEditBedModal = () => {
+    fetch('./editBedModal.html')
+        .then(response => response.text())
+        .then(data => {
             document.body.insertAdjacentHTML('beforeend', data);
         }).catch(err => console.log("Error loading sidebar bar: " + err));
 }
@@ -116,6 +121,7 @@ const updateContentAndInitialize = (section) => {
         loadPatientModal();
     } else if (section === "managewardandbeds") {
         fetchAndRenderPatients();
+        loadEditBedModal();
     }
 };
 
@@ -149,6 +155,7 @@ const initializeFormSubmission = () => {
     });
 };
 
+// conditionally  showing patient list on view-patients and manage bed views
 const fetchAndRenderPatients = async (viewType) => {
     let tableBody;
     if (viewType === "ViewPatients") {
@@ -165,7 +172,7 @@ const fetchAndRenderPatients = async (viewType) => {
     fetchPatients(tableBody, viewType);
 };
 
-
+// fetching data from from firebase and populating it
 const fetchPatients = async (tableBody, viewType) => {
     const querySnapshot = await getDocs(collection(dbRef, "AdmittedPatients"));
     // Clear existing content
@@ -223,14 +230,13 @@ const fetchPatients = async (tableBody, viewType) => {
     document.querySelectorAll(".edit-ward-beds").forEach((button) => {
         button.addEventListener("click", (e) => {
             const patientId = e.target.getAttribute("data-id");
-            //editPatient(patientId);
+            editWardAndBeds(patientId);
         });
     });
     // delete buttons actions
     document.querySelectorAll(".delete-patient").forEach((button) => {
         button.addEventListener("click", (e) => {
             const patientId = e.target.getAttribute("data-id");
-            console.log(patientId)
             deletePatient(patientId);
         });
     });
@@ -243,8 +249,8 @@ const editPatient = async (patientId) => {
         alert("Patient modal not loaded. Please reload the page.");
         return;
     }
-    // Use Bootstrap's modal API to show the modal
     const editModal = new bootstrap.Modal(editModalElement);
+
     try {
         const patientDoc = await getDoc(doc(dbRef, "AdmittedPatients", patientId));
         if (!patientDoc.exists()) {
@@ -295,10 +301,7 @@ const editPatient = async (patientId) => {
 // Delete Patient implementation
 const deletePatient = async (patientId) => {
     try {
-        // Reference the document in the "AdmittedPatients" collection
         const patientDocRef = doc(dbRef, "AdmittedPatients", patientId);
-
-        // Fetch the document to ensure it exists
         const patientDoc = await getDoc(patientDocRef);
 
         // Confirm the deletion with the user
@@ -320,6 +323,56 @@ const deletePatient = async (patientId) => {
     }
 };
 
+const editWardAndBeds = async(patientId) => {
+    const editBedElement = document.getElementById("editBedModal");
+    if (!editBedElement) {
+        alert("Manage ward and bed modal not loaded. Please reload the page.");
+        return;
+    }
+    const editModal = new bootstrap.Modal(editBedElement);
+    try {
+        const patientDoc = await getDoc(doc(dbRef, "AdmittedPatients", patientId));
+        if (!patientDoc.exists()) {
+            alert("Patient not found!");
+            return;
+        }
+        const patientData = patientDoc.data();
+        // Populate the modal with existing ward and bed values
+        document.getElementById("wardSelectionEdit").value = patientData.wardSelection || "";
+        document.getElementById("bedSelectionEdit").value = patientData.bedSelection || "";
+
+        // Show the modal
+        editModal.show();
+
+        // Save changes when the "Save Changes" button is clicked
+        const saveButton = document.getElementById("saveWardAndBed");
+        saveButton.onclick = async () => {
+            const updatedWard = wardSelectionEdit.value;
+            const updatedBed = bedSelectionEdit.value;
+
+            if (!updatedWard || !updatedBed) {
+                alert("Please select both a ward and a bed.");
+                return;
+            }
+            // Update the patient data in Firebase
+            try {
+                await updateDoc(doc(dbRef, "AdmittedPatients", patientId), {
+                    wardSelection: updatedWard,
+                    bedSelection: updatedBed,
+                });
+                alert("Ward and Bed updated successfully!");
+                editModal.hide();
+                fetchPatients(document.querySelector("table.manage-ward-table tbody"), ""); // Refresh the view
+            } catch (err) {
+                console.error("Error updating ward and bed:", err);
+                alert("Failed to update ward and bed. Please try again.");
+            }
+        };
+    } catch (err) {
+        console.error("Error fetching patient data:", err);
+        alert("An error occurred while fetching patient data.");
+    }
+}
 
 const admitPatientFunc = async (patientName, patientDob, patientPhone, wardSelection, bedSelection, admitForm) => {
     const typeOfPatient = "Admitted";
