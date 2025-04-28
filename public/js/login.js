@@ -20,33 +20,34 @@ document.getElementById("loginForm").addEventListener("submit", async (event) =>
     event.preventDefault();
 
     // Collect login credentials
-    const email = document.getElementById("email").value;
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
 
     try {
-        // Fetch user details from Firestore
-        const userDoc = await getDoc(doc(db, "users", email));
+        const response = await fetch("http://localhost:5000/api/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, password })
+        });
 
-        if (!userDoc.exists()) {
-            alert("No user found with this email!");
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.message || "Login failed");
             return;
         }
 
-        const userData = userDoc.data();
-
-        // Validate password
-        if (userData.password !== password) {
-            alert("Invalid password!");
-            return;
-        }
-
-        // Successful login
+        // Save user data (if you send token or info)
+        sessionStorage.setItem("loggedInUser", JSON.stringify(result.user));
+        alert(`Welcome, ${result.user.firstName} ${result.user.lastName}!`);
+        
         window.location.href = "index.html";
-
-        // Optionally, redirect to another page or store user details in session storage
-        // window.location.href = "dashboard.html";
     } catch (error) {
-        console.error("Error during login:", error);
-        alert(`Error: ${error.message}`);
+        console.error("Login error:", error);
+       
+        alert(`Failed to login,  ${error.message}!`);
     }
+});
 });
