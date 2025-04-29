@@ -1,21 +1,8 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { AUTHENTICATION_API } from "../APIsServices.js";
 
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyDmY1e82vl3RUfj5EtPhC8Zl5RnXm9NrZg",
-    authDomain: "hospital-management-syst-5db87.firebaseapp.com",
-    projectId: "hospital-management-syst-5db87",
-    storageBucket: "hospital-management-syst-5db87.appspot.com",
-    messagingSenderId: "879885060770",
-    appId: "1:879885060770:web:e6c172dfb74d6c15ada5fb"
-};
+const login =`${AUTHENTICATION_API.BASE_URL}${AUTHENTICATION_API.LOGIN}`;
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
-// Handle Login Form Submission
 document.getElementById("loginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -24,7 +11,7 @@ document.getElementById("loginForm").addEventListener("submit", async (event) =>
     const password = document.getElementById("password").value;
 
     try {
-        const response = await fetch("http://localhost:5000/api/auth/login", {
+        const response = await fetch(login, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -49,5 +36,4 @@ document.getElementById("loginForm").addEventListener("submit", async (event) =>
        
         alert(`Failed to login,  ${error.message}!`);
     }
-});
 });
