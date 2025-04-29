@@ -58,6 +58,9 @@
 //     });
 // }
 
+// import { API_BASE_URL } from '/src//APIsServices.js';
+
+// const loginUrl = `${API_BASE_URL}/auth/login`;
 
 // Fetch user data from sessionStorage
 const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
@@ -77,7 +80,7 @@ if (!loggedInUser) {
     // Disable form fields initially
     profileForm.querySelectorAll("input, textarea, select").forEach((field) => (field.disabled = true));
 
-    // Split full name into first and last name (basic approach)
+    // Split full name into first and last name
     const nameParts = loggedInUser.name?.split(" ") || [];
     const firstName = nameParts[0] || "";
     const lastName = nameParts.slice(1).join(" ") || "";
@@ -108,7 +111,7 @@ if (!loggedInUser) {
             role: roleField.value
         };
 
-        // Update sessionStorage
+        // Updating sessionStorage
         sessionStorage.setItem("loggedInUser", JSON.stringify(updatedProfile));
 
         // Disable fields and reset buttons
