@@ -23,7 +23,7 @@ export const PATIENT_API = {
   GET_PROFILE: "/:id",
   UPDATE_PROFILE: "/:id",
   CREATE_MEDICAL_RECORDS: "/medicalRecords",
-  VIEW_MEDICAL_RECORDS: "/:id/medical-records",
+  VIEW_MEDICAL_RECORDS: "/6799532fac22c94e30abbf03/medical-records",
 };
 
 // Staff Services BaseUrl API
