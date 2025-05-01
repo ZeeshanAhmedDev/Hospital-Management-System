@@ -1,21 +1,8 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { AUTHENTICATION_API } from "../APIsServices.js";
 
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyDmY1e82vl3RUfj5EtPhC8Zl5RnXm9NrZg",
-    authDomain: "hospital-management-syst-5db87.firebaseapp.com",
-    projectId: "hospital-management-syst-5db87",
-    storageBucket: "hospital-management-syst-5db87.appspot.com",
-    messagingSenderId: "879885060770",
-    appId: "1:879885060770:web:e6c172dfb74d6c15ada5fb"
-};
+const login =`${AUTHENTICATION_API.BASE_URL}${AUTHENTICATION_API.LOGIN}`;
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
-// Handle Login Form Submission
 document.getElementById("loginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -24,30 +11,29 @@ document.getElementById("loginForm").addEventListener("submit", async (event) =>
     const password = document.getElementById("password").value;
 
     try {
-        // Fetch user details from Firestore
-        const userDoc = await getDoc(doc(db, "users", email));
+        const response = await fetch(login, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, password })
+        });
 
-        if (!userDoc.exists()) {
-            alert("No user found with this email!");
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.message || "Login failed");
             return;
         }
 
-        const userData = userDoc.data();
-
-        // Validate password
-        if (userData.password !== password) {
-            alert("Invalid password!");
-            return;
-        }
-
-        // Save user information to sessionStorage
-        sessionStorage.setItem("loggedInUser", JSON.stringify(userData));
-
-        // Redirect to the home page (or dashboard)
-        alert(`Welcome, ${userData.firstName} ${userData.lastName}!`);
+        // Save user data (if you send token or info)
+        sessionStorage.setItem("loggedInUser", JSON.stringify(result.user));
+        alert(`Welcome, ${result.user.firstName} ${result.user.lastName}!`);
+        
         window.location.href = "index.html";
     } catch (error) {
-        console.error("Error during login:", error);
-        alert(`Error: ${error.message}`);
+        console.error("Login error:", error);
+       
+        alert(`Failed to login,  ${error.message}!`);
     }
 });
