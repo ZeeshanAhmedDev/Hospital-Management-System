@@ -2,7 +2,7 @@
 // Main app initialization placeholder
 console.log("App initialized");
 import { contentData } from "./contentData.js";
-import { app, auth, onAuthStateChanged, dbRef } from '../../src/firebase.js'
+//import { app, auth, onAuthStateChanged, dbRef } from '../../src/firebase.js'
 import { getFirestore, collection, addDoc, doc, getDocs, getDoc, updateDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 
@@ -144,7 +144,6 @@ const initializeFormSubmission = () => {
         const patientPhone = document.getElementById("patientPhone")?.value.trim();
         const wardSelection = document.getElementById("wardSelection")?.value.trim();
         const bedSelection = document.getElementById("bedSelection")?.value.trim();
-
         // Validate form values (optional)
         if (!patientName || !patientDob || !patientPhone || !wardSelection || !bedSelection) {
             alert("Please fill out all fields.");
@@ -174,76 +173,102 @@ const fetchAndRenderPatients = async (viewType) => {
 
 // fetching data from from firebase and populating it
 const fetchPatients = async (tableBody, viewType) => {
-    const querySnapshot = await getDocs(collection(dbRef, "AdmittedPatients"));
-    // Clear existing content
-    tableBody.innerHTML = "";
-    if (querySnapshot.empty) {
-        tableBody.innerHTML = `<tr><td colspan="7" class="text-center">No patients found.</td></tr>`;
-        return;
-    }
 
-    let counter = 1;
-    let rows = "";
-    let removeORAddColumn;
-    let buttonViewer;
-    querySnapshot.forEach((doc) => {
-        const patient = doc.data();
-        if (viewType === "ViewPatients") {
-            removeORAddColumn = `<td>${patient.patientPhone || "N/A"}</td>`;
+    const calculateAge = (dob) => {
+        const birthDate = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    };
 
-            buttonViewer = `
-            <button class="btn btn-sm btn-warning edit-patient" data-id="${doc.id}">Edit</button>
-            <button class="btn btn-sm btn-primary delete-patient" data-id="${doc.id}">Delete</button>
-            `
-        } else {
-            removeORAddColumn = ``
-            buttonViewer = `
-                <button class="btn btn-sm btn-warning edit-ward-beds" data-id="${doc.id}">Edit</button>
-            `
+    try {
+        const response = await fetch("http://localhost:8000/api/staff/admissions");
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch patients.");
         }
 
-        rows = `
-            <tr>
-                <td>${counter++}</td>
-                <td>${patient.patientName || "N/A"}</td>
-                <td>${patient.patientDob || "N/A"}</td>
-                ${removeORAddColumn}
-                <td>${patient.typeOfPatient || "N/A"}</td>
-                <td>${patient.wardSelection || "N/A"}</td>
-                <td>${patient.bedSelection || "N/A"}</td>
-                <td>
-                    ${buttonViewer}
-                </td>
-            </tr>
+        const patients = await response.json(); // Assuming the API returns an array of patient objects
+
+        tableBody.innerHTML = "";
+
+        if (!patients || patients.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center">No patients found.</td></tr>`;
+            return;
+        }
+
+        let counter = 1;
+        let rows = "";
+
+        patients.forEach((patient) => {
+            let removeORAddColumn;
+            let buttonViewer;
+
+            if (viewType === "ViewPatients") {
+                removeORAddColumn = `<td>${patient.phone || "N/A"}</td>`;
+                buttonViewer = `
+          <button class="btn btn-sm btn-warning edit-patient" data-id="${patient._id}">Edit</button>
+          <button class="btn btn-sm btn-primary delete-patient" data-id="${patient._id}">Delete</button>
         `;
-        tableBody.innerHTML += rows;
-    });
+            } else {
+                removeORAddColumn = ``;
+                buttonViewer = `
+          <button class="btn btn-sm btn-warning edit-ward-beds" data-id="${patient._id}">Edit</button>
+        `;
+            }
 
-    // Edit buttons actions
-    document.querySelectorAll(".edit-patient").forEach((button) => {
-        button.addEventListener("click", (e) => {
-            const patientId = e.target.getAttribute("data-id");
-            editPatient(patientId);
+            rows += `
+        <tr>
+          <td>${counter++}</td>
+          <td>${patient.name || "N/A"}</td>
+         <td>${patient.dob ? calculateAge(patient.dob) + " years" : "N/A"}</td>
+          ${removeORAddColumn}
+          <td>Admitted</td>
+          <td>${patient.ward || "N/A"}</td>
+          <td>${patient.bed || "N/A"}</td>
+          <td>${buttonViewer}</td>
+        </tr>
+      `;
         });
-    });
-    // Edit Ward and beds actions
-    document.querySelectorAll(".edit-ward-beds").forEach((button) => {
-        button.addEventListener("click", (e) => {
-            const patientId = e.target.getAttribute("data-id");
-            editWardAndBeds(patientId);
-        });
-    });
-    // delete buttons actions
-    document.querySelectorAll(".delete-patient").forEach((button) => {
-        button.addEventListener("click", (e) => {
-            const patientId = e.target.getAttribute("data-id");
-            deletePatient(patientId);
-        });
-    });
-}
 
+        tableBody.innerHTML = rows;
+
+        // Event Listeners
+        document.querySelectorAll(".edit-patient").forEach((button) => {
+            button.addEventListener("click", (e) => {
+                const patientId = e.target.getAttribute("data-id");
+                editPatient(patientId);
+            });
+        });
+
+        document.querySelectorAll(".edit-ward-beds").forEach((button) => {
+            button.addEventListener("click", (e) => {
+                const patientId = e.target.getAttribute("data-id");
+                editWardAndBeds(patientId);
+            });
+        });
+
+        document.querySelectorAll(".delete-patient").forEach((button) => {
+            button.addEventListener("click", (e) => {
+                const patientId = e.target.getAttribute("data-id");
+                deletePatient(patientId);
+            });
+        });
+
+    } catch (error) {
+        console.error("Error fetching patients:", error);
+        tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Failed to load patients.</td></tr>`;
+    }
+};
+
+//TODO: need apis 
 // Edit Patient implementation
 const editPatient = async (patientId) => {
+    console.log(patientId)
     const editModalElement = document.getElementById("editPatientModal");
     if (!editModalElement) {
         alert("Patient modal not loaded. Please reload the page.");
@@ -252,45 +277,56 @@ const editPatient = async (patientId) => {
     const editModal = new bootstrap.Modal(editModalElement);
 
     try {
-        const patientDoc = await getDoc(doc(dbRef, "AdmittedPatients", patientId));
-        if (!patientDoc.exists()) {
-            alert("Patient not found!");
-            return;
+        // Fetch patient data from API
+        const response = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`);
+        console.log(response)
+        if (!response.ok) {
+            throw new Error("Patient not found!");
         }
-        const patientData = patientDoc.data();
+        const patientData = await response.json();
+
         // Populate modal fields 
-        document.getElementById("editPatientName").value = patientData.patientName || "";
-        document.getElementById("editPatientDob").value = patientData.patientDob || "";
-        document.getElementById("editPatientPhone").value = patientData.patientPhone || "";
-        document.getElementById("editTypeOfPatient").value = patientData.typeOfPatient || "";
+        document.getElementById("editPatientName").value = patientData.name || "";
+        document.getElementById("editPatientDob").value = patientData.dob ? patientData.dob.split("T")[0] : "";
+        document.getElementById("editPatientPhone").value = patientData.phone || "";
+        document.getElementById("editTypeOfPatient").value = "Admitted"; // Hardcoded if fixed
 
         editModal.show();
+
         // Handle form submission
         const editForm = document.getElementById("editPatientForm");
         editForm.onsubmit = async (e) => {
             e.preventDefault();
 
-            // Get updated values from the form
             const updatedData = {
-                patientName: document.getElementById("editPatientName").value.trim(),
-                patientDob: document.getElementById("editPatientDob").value.trim(),
-                patientPhone: document.getElementById("editPatientPhone").value.trim(),
-                typeOfPatient: document.getElementById("editTypeOfPatient").value.trim(),
+                name: document.getElementById("editPatientName").value.trim(),
+                dob: document.getElementById("editPatientDob").value.trim(),
+                phone: document.getElementById("editPatientPhone").value.trim(),
+                // Optionally: ward, bed, etc. if you have those in the form
             };
-            // Update Firebase
+
             try {
-                await updateDoc(doc(dbRef, "AdmittedPatients", patientId), updatedData);
+                const updateRes = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (!updateRes.ok) {
+                    const errData = await updateRes.json();
+                    throw new Error(errData.message || "Update failed");
+                }
+
                 alert("Patient details updated successfully!");
                 editModal.hide();
 
-                // Refresh the patient list
-                fetchPatients((document.querySelector("table.patient-table tbody"), "ViewPatients"));
+                // Refresh the table
+                fetchPatients(document.querySelector("table.patient-table tbody"), "ViewPatients");
             } catch (updateError) {
                 console.error("Error updating patient:", updateError);
                 alert("Failed to update patient details.");
             }
         };
-
     } catch (error) {
         console.error("Error fetching patient data:", error);
         alert("Failed to fetch patient details.");
@@ -298,6 +334,7 @@ const editPatient = async (patientId) => {
 };
 
 
+//TODO: Need apis
 // Delete Patient implementation
 const deletePatient = async (patientId) => {
     try {
@@ -375,21 +412,47 @@ const editWardAndBeds = async(patientId) => {
 }
 
 const admitPatientFunc = async (patientName, patientDob, patientPhone, wardSelection, bedSelection, admitForm) => {
-    const typeOfPatient = "Admitted";
+    const apiUrl = "http://localhost:8000/api/staff/admit";
+
     try {
-        const docRef = await addDoc(collection(dbRef, "AdmittedPatients"), {
-            patientName,
-            patientDob,
-            patientPhone,
-            wardSelection,
-            bedSelection,
-            typeOfPatient,
-            timestamp: new Date().toISOString()
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: patientName,
+                dob: patientDob,
+                phone: patientPhone,
+                ward: wardSelection,
+                bed: bedSelection,
+                condition: "Admitted"
+            })
         });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to admit patient");
+        }
+
+        const result = await response.json();
+
         admitForm.reset();
-        alert("Patient Admitted Successfully");
+        alert(result.message || "Patient Admitted Successfully");
+        console.log("Admitted patient:", result.patient);
 
     } catch (error) {
-        console.error("Error adding appointments:", error);
+        console.error("Error admitting patient:", error);
+        alert("Error admitting patient: " + error.message);
     }
-}
+};
+
+
+
+
+
+
+
+
+
+

@@ -1,3 +1,13 @@
+const wardTypes = [
+    "General",
+    "Critical Care (ICU)",
+    "High Dependency Unit (HDU)",
+    "Private",
+    "Maternity",
+    "Surgical",
+    "Orthopedic"
+];
+
 const contentData = {
     dashboard: `
                 <div class="row">
@@ -62,11 +72,10 @@ const contentData = {
             <!-- Ward Selection -->
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="wardSelection" class="form-label">Ward</label>
+                    <label for="wardSelection" class="form-label">Ward Type</label>
                     <select class="form-select" id="wardSelection" required>
                         <option value="" disabled selected>Select a ward</option>
-                        <!-- Dropdown options for wards 1-10 -->
-                        ${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">Ward ${i + 1}</option>`).join("")}
+                        ${wardTypes.map(type => `<option value="${type}">${type}</option>`).join("")}
                     </select>
                 </div>
             </div>

@@ -40,11 +40,13 @@ button {
     margin: 1%;
 }
 
-input, textarea {
+input,
+textarea {
     border-radius: 5px !important;
 }
 
-input:disabled, textarea:disabled {
+input:disabled,
+textarea:disabled {
     background-color: #e9ecef;
     cursor: not-allowed;
 }
@@ -53,15 +55,49 @@ input:disabled, textarea:disabled {
 /* carousel */
 .carousel .carousel-indicators button {
     width: 10px;
-   height: 10px;
-   border-radius: 100%;
- }
+    height: 10px;
+    border-radius: 100%;
+}
 
 .carousel .carousel-indicators .active {
     background-color: #ffc107;
 }
 
-carousel-control-prev-icon, .carousel-control-next-icon {
+carousel-control-prev-icon,
+.carousel-control-next-icon {
     color: #ffc107;
 }
 
+.stat-card {
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+    font-weight: bold;
+    height: 100%;
+}
+
+.bg-light-green {
+    background-color: #e6f5ec;
+}
+
+.bg-light-pink {
+    background-color: #fff0f0;
+}
+
+.bg-light-purple {
+    background-color: #eaeaf6;
+}
+
+.text-orange {
+    color: #f86f1c;
+}
+
+.btn-orange {
+    background-color: #f86f1c;
+    color: white;
+    border: none;
+}
+
+.btn-orange:hover {
+    background-color: #e65c10;
+}
