@@ -1,11 +1,18 @@
-import { AUTHENTICATION_API } from '../APIsServices.js';
-const FORGOT_PASSWORD_URL = `${AUTHENTICATION_API.BASE_URL}${AUTHENTICATION_API.FORGOT_PASSWORD}`;
 
-// Forgot Password Form Submission
+import { AUTHENTICATION_API } from '../APIsServices.js';
+
+const FORGOT_PASSWORD_URL = `${AUTHENTICATION_API.BASE_URL}${AUTHENTICATION_API.FORGOT_PASSWORD}`;
+const submitBtn = document.querySelector("#forgotPasswordForm button[type='submit']");
+const originalBtnText = submitBtn.innerHTML;
+
 document.getElementById("forgotPasswordForm").addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const email = document.getElementById("email").value.trim();
+
+    // loading spinner
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Sending...`;
 
     try {
         const response = await fetch(FORGOT_PASSWORD_URL, {
@@ -28,5 +35,9 @@ document.getElementById("forgotPasswordForm").addEventListener("submit", async (
     } catch (error) {
         console.error("Error sending reset link:", error);
         alert(`Error: ${error.message}`);
+    } finally {
+        // Restore button after response
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
     }
 });
