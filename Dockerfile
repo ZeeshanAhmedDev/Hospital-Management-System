@@ -1,11 +1,10 @@
-# Use official lightweight NGINX image
+
 FROM nginx:alpine
 
-# Copy your frontend files into NGINX's default public folder
 COPY public/ /usr/share/nginx/html
 
-# Expose default HTTP port
+# Expose port
 EXPOSE 80
 
-# Start NGINX in the foreground
+# Start engine
 CMD ["nginx", "-g", "daemon off;"]

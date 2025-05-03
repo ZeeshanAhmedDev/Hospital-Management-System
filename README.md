@@ -43,7 +43,7 @@ cd hospital-management-system
 
 ```bash
 docker build -t hospital-ui .
-docker run -d -p 8080:80 hospital-ui
+docker run -d -p 8080:80 --name hospital-frontend hospital-ui
 ```
 
 Then open [http://localhost:8080](http://localhost:8080) in your browser. You will the see the Front-End of the Hospital Management System on the **8080** port. You will also see the dedicated ports in the docker application you can also open this from there. 
@@ -54,9 +54,25 @@ Then open [http://localhost:8080](http://localhost:8080) in your browser. You wi
 Make sure that the Hospital Management System Backend APIs are also dockerized in the defined way. Head over to the backend for the configuration. 
 
 Backend source code (Node.js + Express + MongoDB) available here:  
-👉 [GitHub - Backend Hospital-Management-System](https://github.com/ZeeshanAhmedDev/Backend-Hospital-Management-System.git)
+ [GitHub - Backend Hospital-Management-System](https://github.com/ZeeshanAhmedDev/Backend-Hospital-Management-System.git)
 
 
 
 ## Follow ScreenShots. If you still have not gotten the description
+ Step 01: Clone the repo.
+ (screenshotsTutorials/img01.jpeg)
 
+Step 2: Enter First Command in the termial.
+(screenshotsTutorials/img02.jpeg)
+
+Step 3: Enter Second Command in the termial
+(screenshotsTutorials/img03.jpeg)
+
+Step 4: You will the see the port running into the Docker
+(screenshotsTutorials/img04.jpeg)
+
+
+
+Following the dedicated steps you will get the desired mentioned output.
+
+Thank you
