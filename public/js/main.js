@@ -227,7 +227,7 @@ const fetchPatients = async (tableBody, viewType) => {
           <td>${patient.name || "N/A"}</td>
          <td>${patient.dob ? calculateAge(patient.dob) + " years" : "N/A"}</td>
           ${removeORAddColumn}
-          <td>Admitted</td>
+          <td>${patient.condition || "N/A"}</td>
           <td>${patient.ward || "N/A"}</td>
           <td>${patient.bed || "N/A"}</td>
           <td>${buttonViewer}</td>
@@ -289,7 +289,7 @@ const editPatient = async (patientId) => {
         document.getElementById("editPatientName").value = patientData.name || "";
         document.getElementById("editPatientDob").value = patientData.dob ? patientData.dob.split("T")[0] : "";
         document.getElementById("editPatientPhone").value = patientData.phone || "";
-        document.getElementById("editTypeOfPatient").value = "Admitted"; // Hardcoded if fixed
+        document.getElementById("editTypeOfPatient").value = patientData.condition || "";
 
         editModal.show();
 
@@ -302,6 +302,7 @@ const editPatient = async (patientId) => {
                 name: document.getElementById("editPatientName").value.trim(),
                 dob: document.getElementById("editPatientDob").value.trim(),
                 phone: document.getElementById("editPatientPhone").value.trim(),
+                condition: document.getElementById("editTypeOfPatient").value.trim(),
                 // Optionally: ward, bed, etc. if you have those in the form
             };
 
@@ -338,18 +339,29 @@ const editPatient = async (patientId) => {
 // Delete Patient implementation
 const deletePatient = async (patientId) => {
     try {
-        const patientDocRef = doc(dbRef, "AdmittedPatients", patientId);
-        const patientDoc = await getDoc(patientDocRef);
+        // Fetch patient details to confirm name before deletion
+        const res = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`);
+        if (!res.ok) {
+            throw new Error("Patient not found.");
+        }
+        const patient = await res.json();
 
-        // Confirm the deletion with the user
+        // Confirm deletion
         const confirmDelete = confirm(
-            `Are you sure you want to delete the patient record for ${patientDoc.data().patientName || "this patient"}?`
+            `Are you sure you want to delete the patient record for ${patient.name || "this patient"}?`
         );
-
         if (!confirmDelete) return;
 
-        // Delete the document
-        await deleteDoc(patientDocRef);
+        // Call DELETE API
+        const deleteRes = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
+            method: "DELETE",
+        });
+
+        if (!deleteRes.ok) {
+            const errData = await deleteRes.json();
+            throw new Error(errData.message || "Failed to delete patient.");
+        }
+
         alert("Patient record deleted successfully!");
         const tableBody = document.querySelector("table.patient-table tbody");
         if (tableBody) fetchPatients(tableBody, "ViewPatients");
@@ -360,56 +372,75 @@ const deletePatient = async (patientId) => {
     }
 };
 
-const editWardAndBeds = async(patientId) => {
+
+const editWardAndBeds = async (patientId) => {
     const editBedElement = document.getElementById("editBedModal");
     if (!editBedElement) {
         alert("Manage ward and bed modal not loaded. Please reload the page.");
         return;
     }
+
     const editModal = new bootstrap.Modal(editBedElement);
+
     try {
-        const patientDoc = await getDoc(doc(dbRef, "AdmittedPatients", patientId));
-        if (!patientDoc.exists()) {
+        // Fetch patient data from API
+        const res = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`);
+        if (!res.ok) {
             alert("Patient not found!");
             return;
         }
-        const patientData = patientDoc.data();
-        // Populate the modal with existing ward and bed values
-        document.getElementById("wardSelectionEdit").value = patientData.wardSelection || "";
-        document.getElementById("bedSelectionEdit").value = patientData.bedSelection || "";
 
-        // Show the modal
+        const patientData = await res.json();
+
+        // Populate the modal with existing values
+        document.getElementById("wardSelectionEdit").value = patientData.ward || "";
+        document.getElementById("bedSelectionEdit").value = patientData.bed || "";
+
         editModal.show();
 
-        // Save changes when the "Save Changes" button is clicked
         const saveButton = document.getElementById("saveWardAndBed");
+
         saveButton.onclick = async () => {
-            const updatedWard = wardSelectionEdit.value;
-            const updatedBed = bedSelectionEdit.value;
+            const updatedWard = document.getElementById("wardSelectionEdit").value;
+            const updatedBed = document.getElementById("bedSelectionEdit").value;
 
             if (!updatedWard || !updatedBed) {
                 alert("Please select both a ward and a bed.");
                 return;
             }
-            // Update the patient data in Firebase
+
             try {
-                await updateDoc(doc(dbRef, "AdmittedPatients", patientId), {
-                    wardSelection: updatedWard,
-                    bedSelection: updatedBed,
+                const updateRes = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        ward: updatedWard,
+                        bed: updatedBed,
+                    }),
                 });
+
+                if (!updateRes.ok) {
+                    throw new Error("Failed to update ward/bed");
+                }
+
                 alert("Ward and Bed updated successfully!");
                 editModal.hide();
-                fetchPatients(document.querySelector("table.manage-ward-table tbody"), ""); // Refresh the view
+                fetchPatients(document.querySelector("table.manage-ward-table tbody"), "");
+
             } catch (err) {
                 console.error("Error updating ward and bed:", err);
                 alert("Failed to update ward and bed. Please try again.");
             }
         };
+
     } catch (err) {
         console.error("Error fetching patient data:", err);
         alert("An error occurred while fetching patient data.");
     }
-}
+};
+
 
 const admitPatientFunc = async (patientName, patientDob, patientPhone, wardSelection, bedSelection, admitForm) => {
     const apiUrl = "http://localhost:8000/api/staff/admit";

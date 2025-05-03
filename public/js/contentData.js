@@ -1,7 +1,7 @@
 const wardTypes = [
     "General",
-    "Critical Care (ICU)",
-    "High Dependency Unit (HDU)",
+    "ICU",
+    "HDU",
     "Private",
     "Maternity",
     "Surgical",
