@@ -59,17 +59,18 @@ Backend source code (Node.js + Express + MongoDB) available here:
 
 
 ## Follow ScreenShots. If you still have not gotten the description
- Step 01: Clone the repo.
- (screenshotsTutorials/img01.jpeg)
 
-Step 2: Enter First Command in the termial.
-(screenshotsTutorials/img02.jpeg)
+### Step 01: Clone the repo
+![Step 01](screenshotsTutorials/img01.jpeg)
 
-Step 3: Enter Second Command in the termial
-(screenshotsTutorials/img03.jpeg)
+### Step 02: Enter First Command in the terminal
+![Step 02](screenshotsTutorials/img02.jpeg)
 
-Step 4: You will the see the port running into the Docker
-(screenshotsTutorials/img04.jpeg)
+### Step 03: Enter Second Command in the terminal
+![Step 03](screenshotsTutorials/img03.jpeg)
+
+### Step 04: You will see the port running in Docker
+![Step 04](screenshotsTutorials/img04.jpeg)
 
 
 
