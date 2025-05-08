@@ -140,6 +140,18 @@ const contentData = {
                     </tbody>
                 </table>
             `,
+    staffwardmanagement: `
+                <h2>Manage Staff Wards</h2>
+                <div class="mb-4">
+                    <p><strong>Name:</strong> <span id="staffName"></span></p>
+                    <p><strong>Role:</strong> <span id="staffRole"></span></p>
+                    <p><strong>Assigned Wards:</strong> <span id="assignedWards"></span></p>
+
+                    <label for="wardSelect"><strong>Update Assigned Wards:</strong></label>
+                    <select id="wardSelect" class="form-select" multiple></select>
+                    <button class="btn btn-primary mt-2" id="updateWardsBtn">Update Wards</button>
+                </div>
+            `,
     medicalrecords: `
                 <h1>Patients Medical Records</h1>
                 <p>Medical Records.</p>

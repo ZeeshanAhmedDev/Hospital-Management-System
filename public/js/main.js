@@ -27,6 +27,12 @@ if (logoutBtn) {
 
 
 const loggedInUser = sessionStorage.getItem("loggedInUser");
+let userData;
+let token;
+if (loggedInUser) {
+    userData = JSON.parse(loggedInUser);
+    token = userData.token?.trim();
+}
 
 const loadPatientSideBars = () => {
     fetch('dashboard/patientSideBar.html')
@@ -64,9 +70,7 @@ const loadEditBedModal = () => {
 }
 
 if (loggedInUser) {
-
-    const userData = JSON.parse(loggedInUser);
-    if (userData.role === "Patient") {
+    if (userData?.user?.role === "Patient") {
         loadPatientSideBars();
     }
     else {
@@ -122,6 +126,8 @@ const updateContentAndInitialize = (section) => {
     } else if (section === "managewardandbeds") {
         fetchAndRenderPatients();
         loadEditBedModal();
+    } else if (section === "staffwardmanagement") {
+        loadStaffWardManagement()
     }
 };
 
@@ -186,7 +192,13 @@ const fetchPatients = async (tableBody, viewType) => {
     };
 
     try {
-        const response = await fetch("http://localhost:8000/api/staff/admissions");
+        const response = await fetch("http://localhost:8000/api/staff/admissions", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
         if (!response.ok) {
             throw new Error("Failed to fetch patients.");
@@ -265,7 +277,64 @@ const fetchPatients = async (tableBody, viewType) => {
     }
 };
 
-//TODO: need apis 
+// TODO: have to work later
+const loadStaffWardManagement = async (staffId) => {   
+    try {
+        const res = await fetch('http://localhost:8000/api/staff/me', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const staff = await res.json();
+        console.log(staff);
+        const name = `${staff.firstName} ${staff.lastName}`;
+
+        // Display staff details
+        document.getElementById("staffName").textContent = name|| "N/A";
+        document.getElementById("staffRole").textContent = staff.role || "N/A";
+        document.getElementById("assignedWards").textContent = [...new Set(staff.wardsAssigned)].join(", ") || "None";
+
+        // Populate ward select dropdown
+        const wardOptions = ["Cardiology", "Pediatrics", "Orthopedics", "ICU", "Emergency"];
+        const select = document.getElementById("wardSelect");
+
+        wardOptions.forEach(ward => {
+            const option = document.createElement("option");
+            option.value = ward;
+            option.text = ward;
+            if (staff.wardsAssigned.includes(ward)) option.selected = true;
+            select.appendChild(option);
+        });
+
+        // Handle update
+        document.getElementById("updateWardsBtn").onclick = async () => {
+            const selectedWards = Array.from(select.selectedOptions).map(o => o.value);
+
+            const updateRes = await fetch(`http://localhost:8000/api/staff/${staffId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ wardsAssigned: selectedWards })
+            });
+
+            if (updateRes.ok) {
+                alert("Wards updated!");
+                document.getElementById("assignedWards").textContent = selectedWards.join(", ");
+            } else {
+                alert("Failed to update wards.");
+            }
+        };
+
+    } catch (err) {
+        console.error("Error loading staff data:", err);
+        alert("Could not load staff info.");
+    }
+    
+};
+
+
 // Edit Patient implementation
 const editPatient = async (patientId) => {
     console.log(patientId)
@@ -278,8 +347,13 @@ const editPatient = async (patientId) => {
 
     try {
         // Fetch patient data from API
-        const response = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`);
-        console.log(response)
+        const response = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
         if (!response.ok) {
             throw new Error("Patient not found!");
         }
@@ -309,7 +383,10 @@ const editPatient = async (patientId) => {
             try {
                 const updateRes = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
                     method: "PUT",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(updatedData)
                 });
 
@@ -334,16 +411,20 @@ const editPatient = async (patientId) => {
     }
 };
 
-
-//TODO: Need apis
 // Delete Patient implementation
 const deletePatient = async (patientId) => {
     try {
-        // Fetch patient details to confirm name before deletion
-        const res = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`);
+        const res = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
         if (!res.ok) {
             throw new Error("Patient not found.");
         }
+
         const patient = await res.json();
 
         // Confirm deletion
@@ -352,16 +433,18 @@ const deletePatient = async (patientId) => {
         );
         if (!confirmDelete) return;
 
-        // Call DELETE API
         const deleteRes = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
             method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
         });
 
         if (!deleteRes.ok) {
             const errData = await deleteRes.json();
             throw new Error(errData.message || "Failed to delete patient.");
         }
-
         alert("Patient record deleted successfully!");
         const tableBody = document.querySelector("table.patient-table tbody");
         if (tableBody) fetchPatients(tableBody, "ViewPatients");
@@ -384,7 +467,12 @@ const editWardAndBeds = async (patientId) => {
 
     try {
         // Fetch patient data from API
-        const res = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`);
+        const res = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
+        });
         if (!res.ok) {
             alert("Patient not found!");
             return;
@@ -414,6 +502,7 @@ const editWardAndBeds = async (patientId) => {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}` // ✅ Add token here
                     },
                     body: JSON.stringify({
                         ward: updatedWard,
@@ -422,7 +511,8 @@ const editWardAndBeds = async (patientId) => {
                 });
 
                 if (!updateRes.ok) {
-                    throw new Error("Failed to update ward/bed");
+                    const errData = await updateRes.json();
+                    throw new Error(errData.message || "Failed to update ward/bed");
                 }
 
                 alert("Ward and Bed updated successfully!");
@@ -449,7 +539,8 @@ const admitPatientFunc = async (patientName, patientDob, patientPhone, wardSelec
         const response = await fetch(apiUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}` // ✅ Add Authorization header
             },
             body: JSON.stringify({
                 name: patientName,

@@ -27,7 +27,7 @@ document.getElementById("loginForm").addEventListener("submit", async (event) =>
         }
 
         // Save user data (if you send token or info)
-        sessionStorage.setItem("loggedInUser", JSON.stringify(result.user));
+        sessionStorage.setItem("loggedInUser", JSON.stringify(result));
         alert(`Welcome, ${result.user.firstName} ${result.user.lastName}!`);
         
         window.location.href = "index.html";
