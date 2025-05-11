@@ -129,13 +129,16 @@ const updateContentAndInitialize = (section) => {
     } else if (section === "staffwardmanagement") {
         loadStaffWardManagement()
     }
+    else if (section === "addadoctor") {
+        loadAddDoctor()
+    }
 };
 
 
 
 // Admit patient form submission
 const initializeFormSubmission = () => {
-    const admitForm = document.querySelector("form");
+    const admitForm = document.getElementById("admitForm");
     if (!admitForm) {
         console.error("Admit form not found!");
         return;
@@ -278,7 +281,7 @@ const fetchPatients = async (tableBody, viewType) => {
 };
 
 // TODO: have to work later
-const loadStaffWardManagement = async (staffId) => {   
+const loadStaffWardManagement = async (staffId) => {
     try {
         const res = await fetch('http://localhost:8000/api/staff/me', {
             method: 'GET',
@@ -293,7 +296,7 @@ const loadStaffWardManagement = async (staffId) => {
         const name = `${staff.firstName} ${staff.lastName}`;
 
         // Display staff details
-        document.getElementById("staffName").textContent = name|| "N/A";
+        document.getElementById("staffName").textContent = name || "N/A";
         document.getElementById("staffRole").textContent = staff.role || "N/A";
         document.getElementById("assignedWards").textContent = [...new Set(staff.wardsAssigned)].join(", ") || "None";
 
@@ -331,7 +334,7 @@ const loadStaffWardManagement = async (staffId) => {
         console.error("Error loading staff data:", err);
         alert("Could not load staff info.");
     }
-    
+
 };
 
 
@@ -569,6 +572,62 @@ const admitPatientFunc = async (patientName, patientDob, patientPhone, wardSelec
     }
 };
 
+
+const loadAddDoctor = () => {
+    const doctorForm = document.getElementById("addDoctorForm");
+    if (!doctorForm) {
+        console.error("Admit form not found!");
+        return;
+    }
+
+    doctorForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const form = e.target;
+
+        // Get form values
+        const doctorName = document.getElementById("patientName")?.value.trim();
+        const doctorEmail = document.getElementById("patientDob")?.value.trim();
+        const doctorPhone = document.getElementById("patientPhone")?.value.trim();
+        const doctorAddress = document.getElementById("patientPhone")?.value.trim();
+
+        // Validate form values (optional)
+        if (!doctorName || !doctorEmail || !doctorPhone || !doctorAddress) {
+            alert("Please fill out all fields.");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:8000/api/staff/add-doctor", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    name: doctorName,
+                    email: doctorEmail,
+                    phoneNumber: doctorPhone,
+                    address: doctorAddress,
+                    role: "Doctor",
+                    schedule: [],
+                    wardsAssigned: []
+                }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert("Doctor added successfully!");
+                doctorForm.reset();
+            } else {
+                alert(result.message || "Failed to add doctor.");
+            }
+        } catch (error) {
+            console.error("Error adding doctor:", error);
+            alert("An error occurred while adding the doctor.");
+        }
+    });
+}
 
 
 

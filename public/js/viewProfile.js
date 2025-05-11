@@ -1,6 +1,7 @@
 
 // Fetch user data from sessionStorage
 const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+console.log(loggedInUser)
 
 if (!loggedInUser) {
     alert("You are not logged in. Redirecting to login page...");
@@ -18,15 +19,15 @@ if (!loggedInUser) {
     profileForm.querySelectorAll("input, textarea, select").forEach((field) => (field.disabled = true));
 
     // Split full name into first and last name
-    const nameParts = loggedInUser.name?.split(" ") || [];
-    const firstName = nameParts[0] || "";
-    const lastName = nameParts.slice(1).join(" ") || "";
+    //const nameParts = loggedInUser.name?.split(" ") || [];
+    //const firstName = nameParts[0] || "";
+    //const lastName = nameParts.slice(1).join(" ") || "";
 
     // Populate user data in the form
-    firstNameField.value = firstName;
-    lastNameField.value = lastName;
-    emailField.value = loggedInUser.email || "";
-    roleField.value = loggedInUser.role || "";
+    firstNameField.value = loggedInUser?.user?.firstName;
+    lastNameField.value = loggedInUser?.user?.lastName;
+    emailField.value = loggedInUser?.user?.email || "";
+    roleField.value = loggedInUser?.user?.role || "";
 
     // Enable editing of profile fields
     editButton.addEventListener("click", () => {

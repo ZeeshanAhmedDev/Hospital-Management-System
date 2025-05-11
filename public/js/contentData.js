@@ -42,7 +42,7 @@ const contentData = {
             `,
     admitpatient: `
     <h2 class="text-center">Admit Patient</h2>
-    <form>
+    <form id="admitForm">
         <!-- Patient Name -->
         <div class="mb-3">
             <label for="patientName" class="form-label">Patient Name</label>
@@ -139,6 +139,37 @@ const contentData = {
                         
                     </tbody>
                 </table>
+            `,
+    addadoctor:`
+            <div class="container mt-4">
+                <h2 class="mb-2">Add a Doctor</h2>
+                <form id="addDoctorForm" class="text-center">
+                    <div class="mb-1">
+                        <label for="name" class="form-label">Doctor's Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required />
+                    </div>
+
+                    <div class="row mb-1">
+                        <div class="col-md-6 mb-1">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required />
+                        </div>
+
+                        <div class="col-md-6 mb-1">
+                            <label for="phoneNumber" class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" required />
+                        </div>
+                    </div>
+
+
+                    <div class="mb-1">
+                        <label for="address" class="form-label">Address</label>
+                        <input type="text" class="form-control" id="address" name="address" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary ">Add Doctor</button>
+                </form>
+            </div>
             `,
     staffwardmanagement: `
                 <h2>Manage Staff Wards</h2>
