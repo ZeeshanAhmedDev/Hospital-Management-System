@@ -281,9 +281,14 @@ const fetchPatients = async (tableBody, viewType) => {
 };
 
 // TODO: have to work later
-const loadStaffWardManagement = async (staffId) => {
+const loadStaffWardManagement = async () => {
+    let stuffTableBody = document.querySelector("table.staff-table tbody");
+    if (!stuffTableBody) {
+        console.error("Table body not found!");
+        return;
+    }
     try {
-        const res = await fetch('http://localhost:8000/api/staff/me', {
+        const res = await fetch('http://localhost:8000/api/staff/all-stuffs', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -291,44 +296,85 @@ const loadStaffWardManagement = async (staffId) => {
             }
         });
 
-        const staff = await res.json();
-        console.log(staff);
-        const name = `${staff.firstName} ${staff.lastName}`;
+        const staffs = await res.json();
+        stuffTableBody.innerHTML = "";
+        let rows = "";
 
-        // Display staff details
-        document.getElementById("staffName").textContent = name || "N/A";
-        document.getElementById("staffRole").textContent = staff.role || "N/A";
-        document.getElementById("assignedWards").textContent = [...new Set(staff.wardsAssigned)].join(", ") || "None";
+        staffs.forEach(stuff => {
+            const { name, phoneNumber, wardsAssigned, schedule } = stuff;
 
-        // Populate ward select dropdown
-        const wardOptions = ["Cardiology", "Pediatrics", "Orthopedics", "ICU", "Emergency"];
-        const select = document.getElementById("wardSelect");
+            // Format wards
+            const wards = wardsAssigned && wardsAssigned.length
+                ? wardsAssigned.map(w => `
+                <div class="ward-item d-flex justify-content-between align-items-center mb-1">
+                    <span>${w}</span>
+                    <button class="btn btn-outline-danger btn-remove-ward ms-2 p-0" style="font-size: 0.75rem; line-height: 1; width: 20px; height: 20px;" data-id="${stuff._id}" data-ward="${w}">×</button>
 
-        wardOptions.forEach(ward => {
-            const option = document.createElement("option");
-            option.value = ward;
-            option.text = ward;
-            if (staff.wardsAssigned.includes(ward)) option.selected = true;
-            select.appendChild(option);
+                </div>
+            `).join("")
+                : "<div>No wards assigned</div>";
+
+            // Get latest schedule or fallback
+            let shiftDisplay = "<div>No shift</div>";
+            if (schedule && schedule.length) {
+                // You can change `.slice(-1)` to `[0]` if you want the first entry instead
+                const latestShift = schedule[schedule.length - 1];
+                shiftDisplay = `<div class="mb-2">${latestShift.shift}</div>`;
+            }
+
+            rows += `
+        <tr>
+          <td>25/05/2025</td>
+          <td>
+            <div class="fw-bold">${name}</div>
+            <div class="text-muted small">${phoneNumber}</div>
+          </td>
+          <td>
+            <div id="wards-${stuff._id}">
+                ${wards}
+            </div>
+            <div class="dropdown d-inline">
+                <button class="btn btn-sm btn-outline-primary mt-2 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Update
+                </button>
+                <ul class="dropdown-menu ward-options" data-id="${stuff._id}">
+                    ${['General', 'ICU', 'HDU', 'Private', 'Maternity', 'Surgical', 'Orthopedic']
+                    .map(ward => `<li><a class="dropdown-item ward-item" href="#" data-ward="${ward}">${ward}</a></li>`)
+                    .join("")}
+                </ul>
+
+            </div>
+            </td>
+
+          <td>
+            ${shiftDisplay}
+            <button class="btn btn-sm btn-outline-primary">Update</button>
+          </td>
+        </tr>
+        `;
         });
 
-        // Handle update
-        document.getElementById("updateWardsBtn").onclick = async () => {
-            const selectedWards = Array.from(select.selectedOptions).map(o => o.value);
-
-            const updateRes = await fetch(`http://localhost:8000/api/staff/${staffId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ wardsAssigned: selectedWards })
+        
+        stuffTableBody.innerHTML = rows;
+        document.querySelectorAll(".ward-options").forEach((menu) => {
+            menu.addEventListener("click", (e) => {
+                if (e.target.classList.contains("ward-item")) {
+                    e.preventDefault();
+                    const staffId = menu.getAttribute("data-id");
+                    const selectedWard = e.target.getAttribute("data-ward");
+                    updateWard(staffId, selectedWard);
+                }
             });
+        });
 
-            if (updateRes.ok) {
-                alert("Wards updated!");
-                document.getElementById("assignedWards").textContent = selectedWards.join(", ");
-            } else {
-                alert("Failed to update wards.");
-            }
-        };
+        document.querySelectorAll(".btn-remove-ward").forEach(button => {
+            button.addEventListener("click", async (e) => {
+                e.preventDefault();
+                const staffId = button.getAttribute("data-id");
+                const ward = button.getAttribute("data-ward");
+                await removeWard(staffId, ward);
+            });
+        });
 
     } catch (err) {
         console.error("Error loading staff data:", err);
@@ -337,7 +383,86 @@ const loadStaffWardManagement = async (staffId) => {
 
 };
 
+// Wards adding functionality
+const updateWard = async (staffId, ward) => {
+    try {
+        const container = document.getElementById(`wards-${staffId}`);
+        const currentWards = Array.from(container.querySelectorAll("div")).map(div => div.textContent.trim());
 
+        // Avoid duplicate assignment
+        if (currentWards.includes(ward)) {
+            alert("Ward already assigned.");
+            return;
+        }
+        if (currentWards.length > 2) {
+            alert("Maximum 3 wards can possible to assign.");
+            return;
+        }
+
+        // Call the backend API
+        const response = await fetch(`http://localhost:8000/api/staff/${staffId}/assign-wards`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ wards: [ward] })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Failed to assign ward.");
+        }
+
+        if (currentWards.includes("No wards assigned")) {
+            currentWards.length = 0;
+        }
+        currentWards.push(ward);
+        container.innerHTML = currentWards.map(w => `<div>${w}</div>`).join("");
+
+        alert("Ward assigned successfully.");
+    } catch (error) {
+        console.error("Error assigning ward:", error);
+        alert("Failed to assign ward. See console for details.");
+    }
+}
+
+
+// remove ward 
+const removeWard = async (staffId, ward) => {
+    try {
+        const res = await fetch(`http://localhost:8000/api/staff/${staffId}/remove-ward`, {
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ ward })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || "Failed to remove ward");
+        }
+
+        // Remove from DOM
+        const wardElement = document.querySelector(`button[data-id="${staffId}"][data-ward="${ward}"]`).parentElement;
+        wardElement.remove();
+
+        // If container becomes empty, show fallback
+        const container = document.getElementById(`wards-${staffId}`);
+        if (!container.querySelector(".ward-item")) {
+            container.innerHTML = "<div>No wards assigned</div>";
+        }
+
+        alert("Ward removed successfully.");
+    } catch (err) {
+        console.error("Error removing ward:", err);
+        alert("Failed to remove ward.");
+    }
+}
 // Edit Patient implementation
 const editPatient = async (patientId) => {
     console.log(patientId)
@@ -576,7 +701,7 @@ const admitPatientFunc = async (patientName, patientDob, patientPhone, wardSelec
 const loadAddDoctor = () => {
     const doctorForm = document.getElementById("addDoctorForm");
     if (!doctorForm) {
-        console.error("Admit form not found!");
+        console.error("Doctor form not found!");
         return;
     }
 
@@ -585,16 +710,16 @@ const loadAddDoctor = () => {
         const form = e.target;
 
         // Get form values
-        const doctorName = document.getElementById("patientName")?.value.trim();
-        const doctorEmail = document.getElementById("patientDob")?.value.trim();
-        const doctorPhone = document.getElementById("patientPhone")?.value.trim();
-        const doctorAddress = document.getElementById("patientPhone")?.value.trim();
+        const doctorName = document.getElementById("doctorName")?.value.trim();
+        const doctorEmail = document.getElementById("doctorEmail")?.value.trim();
+        const doctorPhone = document.getElementById("doctorPhone")?.value.trim();
+        const doctorAddress = document.getElementById("doctorAddress")?.value.trim();
 
-        // Validate form values (optional)
         if (!doctorName || !doctorEmail || !doctorPhone || !doctorAddress) {
             alert("Please fill out all fields.");
             return;
         }
+
 
         try {
             const response = await fetch("http://localhost:8000/api/staff/add-doctor", {
@@ -608,13 +733,14 @@ const loadAddDoctor = () => {
                     email: doctorEmail,
                     phoneNumber: doctorPhone,
                     address: doctorAddress,
-                    role: "Doctor",
+                    role: "doctor",
                     schedule: [],
                     wardsAssigned: []
                 }),
             });
 
             const result = await response.json();
+            console.log(result)
 
             if (response.ok) {
                 alert("Doctor added successfully!");

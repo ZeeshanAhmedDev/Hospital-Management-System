@@ -8,6 +8,7 @@ const wardTypes = [
     "Orthopedic"
 ];
 
+
 const contentData = {
     dashboard: `
                 <div class="row">
@@ -140,48 +141,55 @@ const contentData = {
                     </tbody>
                 </table>
             `,
-    addadoctor:`
+    addadoctor: `
             <div class="container mt-4">
                 <h2 class="mb-2">Add a Doctor</h2>
-                <form id="addDoctorForm" class="text-center">
-                    <div class="mb-1">
-                        <label for="name" class="form-label">Doctor's Name</label>
-                        <input type="text" class="form-control" id="name" name="name" required />
+                <form id="addDoctorForm" class="p-1 text-center">
+                <div class="mb-1">
+                    <label for="doctorName" class="form-label">Doctor's Name</label>
+                    <input type="text" class="form-control" id="doctorName" name="name" required />
+                </div>
+
+                <div class="row mb-1">
+                    <div class="col-md-6 mb-1">
+                        <label for="doctorEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="doctorEmail" name="email" required />
                     </div>
 
-                    <div class="row mb-1">
-                        <div class="col-md-6 mb-1">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required />
-                        </div>
-
-                        <div class="col-md-6 mb-1">
-                            <label for="phoneNumber" class="form-label">Phone Number</label>
-                            <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" required />
-                        </div>
+                    <div class="col-md-6 mb-1">
+                        <label for="doctorPhone" class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" id="doctorPhone" name="phoneNumber" required />
                     </div>
+                </div>
 
+                <div class="mb-1">
+                    <label for="doctorAddress" class="form-label">Address</label>
+                    <input type="text" class="form-control" id="doctorAddress" name="address" required />
+                </div>
 
-                    <div class="mb-1">
-                        <label for="address" class="form-label">Address</label>
-                        <input type="text" class="form-control" id="address" name="address" required />
-                    </div>
-
-                    <button type="submit" class="btn btn-primary ">Add Doctor</button>
-                </form>
+                <button type="submit" class="btn btn-primary">Add Doctor</button>
+            </form>
             </div>
             `,
     staffwardmanagement: `
-                <h2>Manage Staff Wards</h2>
-                <div class="mb-4">
-                    <p><strong>Name:</strong> <span id="staffName"></span></p>
-                    <p><strong>Role:</strong> <span id="staffRole"></span></p>
-                    <p><strong>Assigned Wards:</strong> <span id="assignedWards"></span></p>
-
-                    <label for="wardSelect"><strong>Update Assigned Wards:</strong></label>
-                    <select id="wardSelect" class="form-select" multiple></select>
-                    <button class="btn btn-primary mt-2" id="updateWardsBtn">Update Wards</button>
-                </div>
+                <h2>Manage Staff </h2>
+                <div class="container my-4">
+                    <div class="table-responsive">
+                        <table class="table table-bordered text-center align-middle staff-table">
+                        <thead class="table-light">
+                            <tr>
+                            <th style="width: 15%;">Date</th>
+                            <th style="width: 25%;">Staff</th>
+                            <th style="width: 35%;">Wards</th>
+                            <th style="width: 25%;">Start Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        
+                        </tbody>
+                        </table>
+                    </div>
+                    </div>
             `,
     medicalrecords: `
                 <h1>Patients Medical Records</h1>
@@ -189,7 +197,7 @@ const contentData = {
             `,
     manageshifts: `
                 <h2>Manage Shifts</h2>
-                     <table class="table table-hover">
+                    <table class="table table-hover">
                                 <thead class="table-dark">
                                     <tr>
                                         <th scope="col">Day</th>
