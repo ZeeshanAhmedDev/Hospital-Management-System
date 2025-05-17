@@ -39,7 +39,35 @@ const contentData = {
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-4">
+                        <div class="card text-white bg-info mb-3">
+                            <div class="card-header">Wards</div>
+                            <div class="card-body">
+                                <h5 class="card-title">7 Types of</h5>
+                                <p class="card-text">Special ward facilities</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-white bg-primary mb-3">
+                            <div class="card-header">Customer Satisfaction</div>
+                            <div class="card-body">
+                                <h5 class="card-title">500</h5>
+                                <p class="card-text">Happy Patients</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-white bg-dark mb-3">
+                            <div class="card-header">Year of Experience</div>
+                            <div class="card-body">
+                                <h5 class="card-title">5 years</h5>
+                                <p class="card-text">Supporting Experiences</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                
             `,
     admitpatient: `
     <h2 class="text-center">Admit Patient</h2>
@@ -178,7 +206,6 @@ const contentData = {
                         <table class="table table-bordered text-center align-middle staff-table">
                         <thead class="table-light">
                             <tr>
-                            <th style="width: 15%;">Date</th>
                             <th style="width: 25%;">Staff</th>
                             <th style="width: 35%;">Wards</th>
                             <th style="width: 25%;">Start Time</th>
@@ -194,32 +221,6 @@ const contentData = {
     medicalrecords: `
                 <h1>Patients Medical Records</h1>
                 <p>Medical Records.</p>
-            `,
-    manageshifts: `
-                <h2>Manage Shifts</h2>
-                    <table class="table table-hover">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th scope="col">Day</th>
-                                        <th scope="col">Start Time</th>
-                                        <th scope="col">Finish Time</th>
-                                        <th scope="col">Shift Type</th>
-                                        <th scope="col">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Tuesday</td>
-                                        <td>15:00</td>
-                                        <td>20:00</td>
-                                        <td>Normal</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-warning">Edit</button>
-                                        </td>
-                                    </tr>
-                                    <!-- Additional rows can be added dynamically here -->
-                                </tbody>
-                            </table>
             `,
     bookedappointments: `
                 <h2>Patients Booked Appointments</h2>

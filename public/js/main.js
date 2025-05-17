@@ -314,17 +314,28 @@ const loadStaffWardManagement = async () => {
             `).join("")
                 : "<div>No wards assigned</div>";
 
-            // Get latest schedule or fallback
-            let shiftDisplay = "<div>No shift</div>";
-            if (schedule && schedule.length) {
-                // You can change `.slice(-1)` to `[0]` if you want the first entry instead
-                const latestShift = schedule[schedule.length - 1];
-                shiftDisplay = `<div class="mb-2">${latestShift.shift}</div>`;
-            }
+                const scheduleHtml = schedule.length
+                ? schedule.map(s => {
+                    const d = new Date(s.date);
+                    const shiftId = `${stuff._id}-${s.date}-${s.shift}`.replace(/\W+/g, "");
+                    return `<div id="shift-${shiftId}" class="mb-2">
+                        ${d.toLocaleDateString("en-GB")}: <strong>${s.shift}</strong>
+                        <button
+                            class="btn btn-outline-danger btn-remove-shift ms-2 p-0"
+                            style="font-size: 0.75rem; line-height: 1; width: 20px; height: 20px;"
+                            data-staff="${stuff._id}" 
+                            data-date="${s.date}" 
+                            data-shift="${s.shift}"
+                            >
+                            ×
+                        </button>
+
+                    </div>`;
+                }).join("")
+                : "<div>No shifts assigned</div>";
 
             rows += `
         <tr>
-          <td>25/05/2025</td>
           <td>
             <div class="fw-bold">${name}</div>
             <div class="text-muted small">${phoneNumber}</div>
@@ -346,15 +357,24 @@ const loadStaffWardManagement = async () => {
             </div>
             </td>
 
-          <td>
-            ${shiftDisplay}
-            <button class="btn btn-sm btn-outline-primary">Update</button>
-          </td>
+            <td class="shift-container">
+                ${scheduleHtml}
+                <form class="schedule-form mt-2" data-id="${stuff._id}">
+                    <input type="date" class="form-control form-control-sm d-inline-block w-auto me-2 schedule-date" required />
+                    <select class="form-select form-select-sm d-inline-block w-auto schedule-shift" required>
+                    <option value="" disabled>Shift</option>
+                    <option value="morning">Morning</option>
+                    <option value="afternoon">Afternoon</option>
+                    <option value="night">Night</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-primary ms-1">Add</button>
+                </form>
+                </td>
         </tr>
         `;
         });
 
-        
+
         stuffTableBody.innerHTML = rows;
         document.querySelectorAll(".ward-options").forEach((menu) => {
             menu.addEventListener("click", (e) => {
@@ -373,8 +393,42 @@ const loadStaffWardManagement = async () => {
                 const staffId = button.getAttribute("data-id");
                 const ward = button.getAttribute("data-ward");
                 await removeWard(staffId, ward);
+                
             });
         });
+        
+        document.querySelectorAll(".btn-remove-shift").forEach((button) => {
+            button.addEventListener("click", async (e) => {
+                e.preventDefault();
+                const staffId = button.getAttribute("data-staff");
+                const shiftDate = button.getAttribute("data-date");
+                const shiftType = button.getAttribute("data-shift");
+
+                if (!confirm(`Remove ${shiftType} shift on ${new Date(shiftDate).toLocaleDateString()}?`)) return;
+
+                removeShift(staffId, shiftDate, shiftType);
+            });
+        });
+
+
+        document.querySelectorAll(".schedule-form").forEach((form) => {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const staffId = form.getAttribute("data-id");
+                const dateInput = form.querySelector(".schedule-date");
+                const shiftSelect = form.querySelector(".schedule-shift");
+
+                const date = dateInput.value;
+                const shift = shiftSelect.value;
+
+                if (!date || !shift) {
+                    alert("Please select both date and shift.");
+                    return;
+                }
+                updateShift(staffId, date, shift, dateInput, shiftSelect) 
+            });
+        });
+
 
     } catch (err) {
         console.error("Error loading staff data:", err);
@@ -461,6 +515,60 @@ const removeWard = async (staffId, ward) => {
     } catch (err) {
         console.error("Error removing ward:", err);
         alert("Failed to remove ward.");
+    }
+}
+
+// add new shift
+const updateShift = async (staffId, date, shift, dateInput, shiftSelect) => {
+    try {
+        const response = await fetch(`http://localhost:8000/api/staff/${staffId}/manage-schedule`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ date, shift })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.message || "Schedule update failed");
+
+        alert("Schedule added successfully. Reload to view changes.");
+        dateInput.value = "";
+        shiftSelect.value = "";
+        location.reload();
+
+    } catch (err) {
+        console.error("Error:", err);
+        alert("Failed to add schedule.");
+    }
+}
+// clear assigned shift per row
+const removeShift = async (staffId, shiftDate, shiftType) => {
+    try {
+        const response = await fetch(`http://localhost:8000/api/staff/${staffId}/remove-shift`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}` // only if you use auth
+            },
+            body: JSON.stringify({ date: shiftDate, shift: shiftType })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Failed to remove shift.");
+        }
+
+        const shiftId = `${staffId}-${shiftDate}-${shiftType}`.replace(/\W+/g, "");
+        const shiftElem = document.getElementById(`shift-${shiftId}`);
+        if (shiftElem) shiftElem.remove();
+        alert("Shift removed successfully.");
+    } catch (error) {
+        console.error("Error removing shift:", error);
+        alert("Failed to remove shift.");
     }
 }
 // Edit Patient implementation
