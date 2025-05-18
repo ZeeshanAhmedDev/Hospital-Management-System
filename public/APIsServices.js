@@ -4,6 +4,7 @@ export const AUTHENTICATION_API = {
   LOGIN: "/auth/login",
   REGISTER: "/auth/register",
   FORGOT_PASSWORD: "/auth/forgot-password",
+  ALL_PATIENTS: "/auth/patients"
 };
 
 // Appointments BaseUrl API

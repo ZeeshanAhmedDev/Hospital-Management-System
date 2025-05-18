@@ -1,0 +1,69 @@
+<div class="modal fade"
+    id="editBedModal"
+    tabindex="-1"
+    aria-labelledby="editBedModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"
+                    id="editBedModalLabel">Manage Ward and Bed</h5>
+                <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="wardAndBedForm">
+                    <div class="mb-3">
+                        <label for="wardSelectionEdit"
+                            class="form-label">Ward</label>
+                        <select class="form-select"
+                            id="wardSelectionEdit"
+                            required>
+                            <option value=""
+                                disabled
+                                selected>Select a ward</option>
+                            <option value="General">General</option>
+                            <option value="ICU">ICU</option>
+                            <option value="HDU">HDU</option>
+                            <option value="Private">Private</option>
+                            <option value="Maternity">Maternity</option>
+                            <option value="Surgical">Surgical</option>
+                            <option value="Orthopedic">Orthopedic</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bedSelectionEdit"
+                            class="form-label">Bed</label>
+                        <select class="form-select"
+                            id="bedSelectionEdit"
+                            required>
+                            <option value=""
+                                disabled
+                                selected>Select a bed</option>
+                            <option value="1">Bed 1</option>
+                            <option value="2">Bed 2</option>
+                            <option value="3">Bed 3</option>
+                            <option value="4">Bed 4</option>
+                            <option value="5">Bed 5</option>
+                            <option value="6">Bed 6</option>
+                            <option value="7">Bed 7</option>
+                            <option value="8">Bed 8</option>
+                            <option value="9">Bed 9</option>
+                            <option value="10">Bed 10</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">Cancel</button>
+                <button type="button"
+                    class="btn btn-primary"
+                    id="saveWardAndBed">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>

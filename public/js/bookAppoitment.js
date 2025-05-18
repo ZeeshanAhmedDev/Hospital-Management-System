@@ -1,4 +1,4 @@
-import { app, auth, onAuthStateChanged, dbRef } from '../../src/firebase.js'
+import { app, dbRef } from '../../src/firebase.js'
 import { getFirestore, collection, addDoc, doc, getDocs, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 
