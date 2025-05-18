@@ -7,15 +7,6 @@ export const AUTHENTICATION_API = {
   ALL_PATIENTS: "/auth/patients"
 };
 
-// Appointments BaseUrl API
-export const APPOINTMENTS_API = {
-  BASE_URL: "http://localhost:6000/api",
-  BOOK_APPOINTMENT: "/appointments",
-  EDIT_APPOINTMENT: "/appointments/:id",
-  CANCEL_APPOINTMENT: "/appointments/:id",
-  GET_APPOINTMENTS: "/appointments",
-};
-
 // Patient Services BaseUrl API
 export const PATIENT_API = {
   BASE_URL: "http://localhost:7000/api/patients",
@@ -37,3 +28,15 @@ export const STAFF_API = {
   ASSIGN_WARDS: "/:id/assign-wards",
   MANAGE_SCHEDULE: "/:id/manage-schedule",
 };
+
+// Appointments BaseUrl API
+export const APPOINTMENTS_API = {
+  BASE_URL: "http://localhost:9000/api",
+  BOOK_APPOINTMENT: "/appointments",
+  EDIT_APPOINTMENT: "/appointments/:id",
+  CANCEL_APPOINTMENT: "/appointments/:id",
+  GET_APPOINTMENTS: "/appointments",
+};
+
+
+//TODO backend appointments .env
