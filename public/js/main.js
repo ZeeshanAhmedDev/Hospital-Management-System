@@ -2,9 +2,6 @@
 // Main app initialization placeholder
 console.log("App initialized");
 import { contentData } from "./contentData.js";
-//import { app, auth, onAuthStateChanged, dbRef } from '../../src/firebase.js'
-import { getFirestore, collection, addDoc, doc, getDocs, getDoc, updateDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
 
 // Initialize the carousel
 const myCarousel = document.querySelector('#carouselExampleIndicators');
@@ -33,6 +30,23 @@ if (loggedInUser) {
     userData = JSON.parse(loggedInUser);
     token = userData.token?.trim();
 }
+
+const getPatients = async () => {
+    try {
+        const res = await fetch('http://localhost:8000/api/staff/all-stuffs', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const staffs = await res.json();
+        console.log(staffs)
+    } catch (error) {
+    }
+}
+getPatients();
 
 const loadPatientSideBars = () => {
     fetch('dashboard/patientSideBar.html')
@@ -280,7 +294,7 @@ const fetchPatients = async (tableBody, viewType) => {
     }
 };
 
-// TODO: have to work later
+// Staff management booked or cancellation things
 const loadStaffWardManagement = async () => {
     let stuffTableBody = document.querySelector("table.staff-table tbody");
     if (!stuffTableBody) {
@@ -314,7 +328,7 @@ const loadStaffWardManagement = async () => {
             `).join("")
                 : "<div>No wards assigned</div>";
 
-                const scheduleHtml = schedule.length
+            const scheduleHtml = schedule.length
                 ? schedule.map(s => {
                     const d = new Date(s.date);
                     const shiftId = `${stuff._id}-${s.date}-${s.shift}`.replace(/\W+/g, "");
@@ -393,10 +407,10 @@ const loadStaffWardManagement = async () => {
                 const staffId = button.getAttribute("data-id");
                 const ward = button.getAttribute("data-ward");
                 await removeWard(staffId, ward);
-                
+
             });
         });
-        
+
         document.querySelectorAll(".btn-remove-shift").forEach((button) => {
             button.addEventListener("click", async (e) => {
                 e.preventDefault();
@@ -425,7 +439,7 @@ const loadStaffWardManagement = async () => {
                     alert("Please select both date and shift.");
                     return;
                 }
-                updateShift(staffId, date, shift, dateInput, shiftSelect) 
+                updateShift(staffId, date, shift, dateInput, shiftSelect)
             });
         });
 
