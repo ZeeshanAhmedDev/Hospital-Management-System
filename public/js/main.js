@@ -132,6 +132,9 @@ const updateContentAndInitialize = (section) => {
     else if (section === "bookappointments") {
         loadAppointmentBooking();
     }
+    else if (section === "manageappointments") {
+        loadBookedAppointment();
+    }
 };
 
 
@@ -162,7 +165,109 @@ const initializeFormSubmission = () => {
         admitPatientFunc(patientName, patientDob, patientPhone, wardSelection, bedSelection, admitForm);
     });
 };
+// load specific user appointment
+const loadBookedAppointment = async () => {
+    const bookedAppointmentTable = document.querySelector("table.appointment-table tbody");
+    if (!bookedAppointmentTable) {
+        console.error("Table body not found!");
+        return;
+    }
+    // Clear existing rows
+    bookedAppointmentTable.innerHTML = "";
+    const patientId = userData?.user?._id;
 
+    try {
+        const res = await fetch(`http://localhost:9000/api/appointments/patient/${patientId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // if using auth
+            }
+        });
+
+        const appointments = await res.json();
+        appointments.forEach(async(appointment, index) => {
+            const tr = document.createElement("tr");
+            const doctorId = appointment.doctorId;
+            const doctorName = await getDoctors(doctorId, "booked");
+
+            // Determine status styling
+            const statusText = appointment.status || "Pending";
+            const isCanceled = statusText.toLowerCase() === "canceled";
+            const statusClass = isCanceled ? "text-danger fw-bold" : "";
+
+            // Create table row content
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${doctorName || "Unknown"}</td>
+                <td class="${statusClass}">${statusText}</td>
+                <td>${appointment.phone || ""}</td>
+                <td>${appointment.email || ""}</td>
+                <td>
+                    <button 
+                        class="btn btn-sm ${isCanceled ? "btn-secondary" : "btn-danger"} cancel-btn" 
+                        data-id="${appointment._id}" 
+                        ${isCanceled ? "disabled" : ""}
+                    >
+                        X
+                    </button>
+                </td>
+            `;
+
+            bookedAppointmentTable.appendChild(tr);
+        });
+
+
+        document.addEventListener("click", async (event) => {
+            if (event.target.classList.contains("cancel-btn")) {
+                const appointmentId = event.target.getAttribute("data-id");
+
+                if (!appointmentId) return;
+
+                const confirmed = confirm("Are you sure you want to cancel this appointment?");
+                if (!confirmed) return;
+
+                try {
+                    const res = await fetch(`http://localhost:9000/api/appointments/${appointmentId}`, {
+                        method: "PATCH",
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}` // Add your token here
+                        }
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        console.log("Appointment canceled:", data);
+
+                        // Update the status cell in the same row
+                        const row = event.target.closest("tr");
+                        const statusCell = row?.querySelector("td:nth-child(3)"); // Adjust index if needed
+                        if (statusCell) {
+                            statusCell.textContent = "canceled";
+                            statusCell.classList.add("text-danger", "fw-bold");
+                        }
+
+                        // Optionally disable the cancel button
+                        event.target.disabled = true;
+                        event.target.classList.remove("btn-danger");
+                        event.target.classList.add("btn-secondary");
+                    } else {
+                        const errorData = await res.json();
+                        console.error("Failed to cancel appointment:", errorData.message);
+                    }
+                } catch (error) {
+                    console.error("Error while cancelling appointment:", error);
+                }
+            }
+        });
+
+    } catch (err) {
+        console.error("Fetch failed:", err);
+    }
+
+}
+// add new appointment
 const loadAppointmentBooking = () => {
     const appointmentForm = document.getElementById("appointmentForm");
     if (!appointmentForm) {
@@ -189,7 +294,7 @@ const loadAppointmentBooking = () => {
     }
 
     const doctorSelect = document.getElementById("doctorSelect");
-    getDoctors(doctorSelect); // populate doctor dropdown
+    getDoctors(doctorSelect, "booking"); // populate doctor dropdown
 
     appointmentForm.addEventListener("submit", (event) => {
         event.preventDefault();
@@ -262,8 +367,11 @@ const getAllApt = async () => {
 };
 
 getAllApt()
-// Get All doctors
-const getDoctors = async (doctorSelect) => {
+// Get All doctors.
+//  two use case. 
+// one in showing doctor 
+// another in showing doctor name
+const getDoctors = async (doctorSelect, type) => {
     try {
         const res = await fetch('http://localhost:8000/api/staff/all-stuffs', {
             method: 'GET',
@@ -274,16 +382,26 @@ const getDoctors = async (doctorSelect) => {
         });
 
         const staffs = await res.json();
-        doctorSelect.innerHTML = '<option value="">Select a Doctor</option>'; // Default option
+        if (type === 'booked') {
+            // doctorSelect is assumed to be the doctor ID in this case
+            const doctor = staffs.find(staff =>
+                staff?.role?.toLowerCase() === "doctor" && staff._id === doctorSelect
+            );
 
-        staffs.forEach((staff) => {
-            if (staff?.role?.toLowerCase() === "doctor") {
-                const option = document.createElement("option");
-                option.value = staff._id;
-                option.textContent = `${staff.name || `${staff.firstName} ${staff.lastName}`}`;
-                doctorSelect.appendChild(option);
-            }
-        });
+            return doctor ? (doctor.name) : "Unknown Doctor";
+        } else {
+            // Populate dropdown options
+            doctorSelect.innerHTML = '<option value="">Select a Doctor</option>'; // Default option
+
+            staffs.forEach((staff) => {
+                if (staff?.role?.toLowerCase() === "doctor") {
+                    const option = document.createElement("option");
+                    option.value = staff._id;
+                    option.textContent = staff.name || `${staff.firstName} ${staff.lastName}`;
+                    doctorSelect.appendChild(option);
+                }
+            });
+        }
     } catch (error) {
         console.error("Failed to load doctors:", error);
     }
