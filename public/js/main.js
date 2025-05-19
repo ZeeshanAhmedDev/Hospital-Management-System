@@ -1,6 +1,7 @@
 
 // Main app initialization placeholder
 console.log("App initialized");
+import { PATIENT_API } from "../APIsServices.js";
 import { contentData } from "./contentData.js";
 
 // Initialize the carousel
@@ -135,6 +136,12 @@ const updateContentAndInitialize = (section) => {
     else if (section === "manageappointments") {
         loadBookedAppointment();
     }
+    else if (section === "medicalrecords") {
+        loadMedicalRecords();
+    }
+    else if (section === "patientappointments") {
+        loadPatientAppointment();
+    }
 };
 
 
@@ -165,6 +172,149 @@ const initializeFormSubmission = () => {
         admitPatientFunc(patientName, patientDob, patientPhone, wardSelection, bedSelection, admitForm);
     });
 };
+
+// Load patient booked appointments
+const loadPatientAppointment = async() => {
+    const patientAppointmentTable = document.querySelector("table.patient-appointment-table tbody");
+    if (!patientAppointmentTable) {
+        console.error("Table body not found!");
+        return;
+    }
+    const appointments = await getAllAppointment();
+    if (!appointments || appointments.length === 0) {
+        patientAppointmentTable.innerHTML = `<tr><td colspan="6" class="text-center">No appointments found.</td></tr>`;
+        return;
+    }
+    patientAppointmentTable.innerHTML = ''; // Clear existing content
+
+    appointments.forEach(async(appointment, index) => {
+        const tr = document.createElement("tr");
+
+        const patientName = `${appointment.firstName} ${appointment.lastName} `
+        const doctorId = appointment.doctorId;
+        const doctorName = await getDoctors(doctorId, "booked");
+        const statusText = appointment.status || "Pending";
+        const isCanceled = statusText.toLowerCase() === "canceled";
+
+        tr.innerHTML = `
+            <td>${patientName || "Unknown"}</td>
+            <td>${doctorName || "Unknown"}</td>
+            <td class="${isCanceled ? 'text-danger fw-bold' : ''}">${statusText}</td>
+            <td>${appointment.phone || ""}</td>
+            <td>${appointment.email || ""}</td>
+            <td>
+                <button 
+                    class="btn btn-sm ${isCanceled ? 'btn-secondary' : 'btn-danger'} cancel-btn"
+                    data-id="${appointment._id}"
+                    ${isCanceled ? 'disabled' : ''}
+                >
+                    X
+                </button>
+            </td>
+        `;
+
+        patientAppointmentTable.appendChild(tr);
+    });
+    document.addEventListener("click", async (event) => {
+        if (event.target.classList.contains("cancel-btn")) {
+            const appointmentId = event.target.getAttribute("data-id");
+
+            if (!appointmentId) return;
+
+            const confirmed = confirm("Are you sure you want to cancel this appointment?");
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`http://localhost:9000/api/appointments/${appointmentId}`, {
+                    method: "PATCH",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // Add your token here
+                    }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    console.log("Appointment canceled:", data);
+
+                    // Update the status cell in the same row
+                    const row = event.target.closest("tr");
+                    const statusCell = row?.querySelector("td:nth-child(3)"); // Adjust index if needed
+                    if (statusCell) {
+                        statusCell.textContent = "canceled";
+                        statusCell.classList.add("text-danger", "fw-bold");
+                    }
+
+                    // Optionally disable the cancel button
+                    event.target.disabled = true;
+                    event.target.classList.remove("btn-danger");
+                    event.target.classList.add("btn-secondary");
+                } else {
+                    const errorData = await res.json();
+                    console.error("Failed to cancel appointment:", errorData.message);
+                }
+            } catch (error) {
+                console.error("Error while cancelling appointment:", error);
+            }
+        }
+    });
+}
+// load medical records for patients
+const loadMedicalRecords = () => {
+    const medicalRecordsTable = document.querySelector("table.records-table tbody");
+    if (!medicalRecordsTable) {
+        console.error("Table body not found!");
+        return;
+    }
+    fetchMedicalRecords(medicalRecordsTable);
+}
+
+const fetchMedicalRecords = async (tbody) => {
+    const GET_RECORDS_URL = `${PATIENT_API.BASE_URL}${PATIENT_API.VIEW_MEDICAL_RECORDS}`;
+    try {
+        const response = await fetch(GET_RECORDS_URL, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        const records = await response.json();
+
+        if (!response.ok) {
+            alert(data.message || "Failed to fetch records.");
+            return;
+        }
+
+        //allRecords = data; // Save search filtering
+        //renderRecords(allRecords);
+
+        tbody.innerHTML = "";
+
+        if (!records.length) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center">No records found.</td></tr>`;
+            return;
+        }
+
+        records.forEach(record => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${record.diagnosis}</td>
+                <td>${record.treatment}</td>
+                <td>${record.doctor}</td>
+                <td>${new Date(record.date).toLocaleDateString()}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+    } catch (error) {
+        console.error("Error fetching medical records:", error);
+        tbody = document.getElementById("recordsBody");
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-danger text-center">Failed to load records.</td></tr>`;
+        }
+    }
+}
 // load specific user appointment
 const loadBookedAppointment = async () => {
     const bookedAppointmentTable = document.querySelector("table.appointment-table tbody");
@@ -348,8 +498,8 @@ const bookAnAppointment = async(appointmentData) => {
     }
 }
 
-// get all appoitmnets
-const getAllApt = async () => {
+// get all appointments
+const getAllAppointment = async () => {
     try {
         const res = await fetch('http://localhost:9000/api/appointments', {
             method: 'GET',
@@ -359,14 +509,14 @@ const getAllApt = async () => {
             }
         });
 
-        const appointments = await res.json();
-        console.log(appointments)
+        return await res.json();
     } catch (error) {
-        console.error("Failed to load doctors:", error);
+        console.error("Failed to load appointments:", error);
+        return [];
     }
 };
 
-getAllApt()
+
 // Get All doctors.
 //  two use case. 
 // one in showing doctor 

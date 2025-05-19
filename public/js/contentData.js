@@ -204,23 +204,39 @@ const contentData = {
                 <div class="container my-4">
                     <div class="table-responsive">
                         <table class="table table-bordered text-center align-middle staff-table">
-                        <thead class="table-light">
-                            <tr>
-                            <th style="width: 25%;">Staff</th>
-                            <th style="width: 35%;">Wards</th>
-                            <th style="width: 25%;">Start Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        
-                        </tbody>
+                            <thead class="table-light">
+                                <tr>
+                                <th style="width: 25%;">Staff</th>
+                                <th style="width: 35%;">Wards</th>
+                                <th style="width: 25%;">Start Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            
+                            </tbody>
                         </table>
                     </div>
                     </div>
             `,
     medicalrecords: `
-                <h1>Patients Medical Records</h1>
-                <p>Medical Records.</p>
+                
+                <h2 class="mb-4">Patient Medical Records</h2>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover records-table">
+                        <thead class="table-primary">
+                        <tr>
+                            <th>Diagnosis</th>
+                            <th>Treatment</th>
+                            <th>Doctor</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <tbody id="recordsBody">
+
+                        <tr><td colspan="4" class="text-center">Loading records...</td></tr>
+                        </tbody>
+                    </table>
+                </div>  
             `,
     bookappointments: `
         <form id="appointmentForm" class="p-3 border rounded shadow-sm" >
@@ -283,5 +299,22 @@ const contentData = {
                     </tbody>
                 </table>
     `,
+    patientappointments: `
+            <h2>Manage Patient booked appointments</h2>
+                <table class="table table-hover patient-appointment-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Patient Name</th>
+                            <th>Doctor Name</th>
+                            <th>Status</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+    `
 };
 export { contentData }
