@@ -204,27 +204,117 @@ const contentData = {
                 <div class="container my-4">
                     <div class="table-responsive">
                         <table class="table table-bordered text-center align-middle staff-table">
-                        <thead class="table-light">
-                            <tr>
-                            <th style="width: 25%;">Staff</th>
-                            <th style="width: 35%;">Wards</th>
-                            <th style="width: 25%;">Start Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        
-                        </tbody>
+                            <thead class="table-light">
+                                <tr>
+                                <th style="width: 25%;">Staff</th>
+                                <th style="width: 35%;">Wards</th>
+                                <th style="width: 25%;">Start Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            
+                            </tbody>
                         </table>
                     </div>
                     </div>
             `,
     medicalrecords: `
-                <h1>Patients Medical Records</h1>
-                <p>Medical Records.</p>
+                
+                <h2 class="mb-4">Patient Medical Records</h2>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover records-table">
+                        <thead class="table-primary">
+                        <tr>
+                            <th>Diagnosis</th>
+                            <th>Treatment</th>
+                            <th>Doctor</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <tbody id="recordsBody">
+
+                        <tr><td colspan="4" class="text-center">Loading records...</td></tr>
+                        </tbody>
+                    </table>
+                </div>  
             `,
-    bookedappointments: `
-                <h2>Patients Booked Appointments</h2>
-                <p>Ward and Bed management functionality goes here.</p>
-            `,
+    bookappointments: `
+        <form id="appointmentForm" class="p-3 border rounded shadow-sm" >
+            <h4 class="mb-3 text-center">Request an Appointments</h4>
+
+            <div class="row">
+                <div class="mb-3 col-md-6">
+                    <label for="firstName" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="firstName" required />
+                </div>
+
+                <div class="mb-3 col-md-6">
+                    <label for="lastName" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lastName" required />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="mb-3 col-md-6">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" required />
+                </div>
+
+                <div class="mb-3 col-md-6">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" id="phone" required />
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="mb-3 col-md-6">
+                    <label for="doctorSelect" class="form-label">Select Doctor</label>
+                    <select id="doctorSelect" class="form-select" required>
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+                <div class="mb-3 col-md-6">
+                    <label for="bookingDate" class="form-label">Booking Date</label>
+                    <input type="date" class="form-control" id="bookingDate" required />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Submit</button>
+        </form>
+`,
+    manageappointments: `
+            <h2>Manage your booking</h2>
+                <table class="table table-hover appointment-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Doctor Name</th>
+                            <th>Status</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+    `,
+    patientappointments: `
+            <h2>Manage Patient booked appointments</h2>
+                <table class="table table-hover patient-appointment-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Patient Name</th>
+                            <th>Doctor Name</th>
+                            <th>Status</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+    `
 };
 export { contentData }
