@@ -33,12 +33,12 @@ if (loggedInUser) {
 }
 
 const loadPatientSideBars = () => {
-    fetch('dashboard/patientSideBar.html')
+    fetch('dashboard/patientIndex.html')
         .then(response => response.text())
         .then(data => {
-            document.getElementById('sidebars').innerHTML = data;
+            document.getElementById('innerController').innerHTML = data;
             // Initialize sidebar
-            initializeSidebarNavigation();
+            //initializeSidebarNavigation();
         }).catch(err => console.log("Error loading sidebar bar: " + err));
 }
 
