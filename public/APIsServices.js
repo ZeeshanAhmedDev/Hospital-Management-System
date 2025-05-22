@@ -37,6 +37,7 @@ export const APPOINTMENTS_API = {
   EDIT_APPOINTMENT: "/appointments/:id",
   CANCEL_APPOINTMENT: "/appointments/:id",
   GET_APPOINTMENTS: "/appointments",
+  GET_SINGLE_PATIENT: "/appointments/patient",
 };
 
 

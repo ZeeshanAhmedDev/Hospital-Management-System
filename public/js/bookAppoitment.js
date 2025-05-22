@@ -1,4 +1,7 @@
+import { APPOINTMENTS_API } from "../APIsServices.js";
 import getDoctors from "../utils/doctorList.js";
+
+const NEW_APPOINTMENTS_URL = `${APPOINTMENTS_API.BASE_URL}${APPOINTMENTS_API.BOOK_APPOINTMENT}`
 
 const loggedInUser = sessionStorage.getItem("loggedInUser");
 let userData;
@@ -60,7 +63,7 @@ appointmentForm.addEventListener("submit", (event) => {
 // book appointment api call
 const bookAnAppointment = async (appointmentData) => {
     try {
-        const res = await fetch("http://localhost:9000/api/appointments", {
+        const res = await fetch(NEW_APPOINTMENTS_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -73,7 +76,7 @@ const bookAnAppointment = async (appointmentData) => {
 
         if (res.ok) {
             alert("Appointment booked successfully!");
-            appointmentForm.reset(); // Optional: clear form
+            appointmentForm.reset();
         } else {
             alert("Failed to book appointment: " + result.message);
         }

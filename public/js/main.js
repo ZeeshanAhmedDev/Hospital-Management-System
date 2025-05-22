@@ -132,7 +132,7 @@ const updateContentAndInitialize = (section) => {
         loadAddDoctor();
     }
     else if (section === "bookappointments") {
-        loadAppointmentBooking();
+        //loadAppointmentBooking();
     }
     else if (section === "manageappointments") {
         loadBookedAppointment();
@@ -317,8 +317,10 @@ const fetchMedicalRecords = async (tbody) => {
         }
     }
 }
+
+//TODO: method cleanup
 // load specific user appointment
-const loadBookedAppointment = async () => {
+/* const loadBookedAppointment = async () => {
     const bookedAppointmentTable = document.querySelector("table.appointment-table tbody");
     if (!bookedAppointmentTable) {
         console.error("Table body not found!");
@@ -419,7 +421,7 @@ const loadBookedAppointment = async () => {
         console.error("Fetch failed:", err);
     }
 
-}
+} */
 //TODO: clean up
 // add new appointment
 /* const loadAppointmentBooking = () => {
