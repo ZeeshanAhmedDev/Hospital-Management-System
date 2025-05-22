@@ -23,6 +23,7 @@ export const STAFF_API = {
   BASE_URL: "http://localhost:8000/api/staff",
   REGISTER: "/register",
   LOGIN: "/login",
+  ALL_STAFF: "/all-stuffs",
   GET_PROFILE: "/:id",
   UPDATE_PROFILE: "/:id",
   ASSIGN_WARDS: "/:id/assign-wards",

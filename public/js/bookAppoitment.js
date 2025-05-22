@@ -1,46 +1,85 @@
-import { app, dbRef } from '../../src/firebase.js'
-import { getFirestore, collection, addDoc, doc, getDocs, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
+import getDoctors from "../utils/doctorList.js";
 
 const loggedInUser = sessionStorage.getItem("loggedInUser");
+let userData;
+let token;
+if (loggedInUser) {
+    userData = JSON.parse(loggedInUser);
+    token = userData.token?.trim();
+}
 
-// Function to write data to Firestore
-async function bookAppointment(firstName, lastName, email, phone, dob, bookingDate) {
-    try {
-        const docRef = await addDoc(collection(dbRef, "appointments"), {
-            firstName,
-            lastName,
-            email,
-            phone,
-            dob,
-            bookingDate,
-            timestamp: new Date().toISOString()
-        });
-        console.log("Appointment booked with Successfully");
-    } catch (error) {
-        console.error("Error adding appointments:", error);
-    }
+const appointmentForm = document.getElementById("appointmentForm");
+const firstNameInput = document.getElementById("firstName");
+if (firstNameInput && userData?.user?.firstName) {
+    firstNameInput.value = userData.user.firstName;
+    firstNameInput.disabled = true;
+}
+
+const lastNameInput = document.getElementById("lastName");
+if (lastNameInput && userData?.user?.lastName) {
+    lastNameInput.value = userData.user.lastName;
+    lastNameInput.disabled = true;
+}
+
+const emailInput = document.getElementById("email");
+if (emailInput && userData?.user?.email) {
+    emailInput.value = userData.user.email;
+    emailInput.disabled = true;
 }
 
 
-document.getElementById('appointmentForm').addEventListener('submit', function (event) {
+
+const doctorSelect = document.getElementById("doctorSelect");
+getDoctors(doctorSelect, "booking", token);
+
+appointmentForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
-    const firstName = document.getElementById('firstName').value.trim();
-    const lastName = document.getElementById('lastName').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const dob = document.getElementById('dob').value;
-    const bookingDate = document.getElementById('bk_date').value;
+    const patientId = userData?.user?._id;
+    const doctorId = doctorSelect?.value;
+    const date = document.getElementById("bookingDate")?.value.trim();
+    const firstName = firstNameInput?.value;
+    const lastName = lastNameInput?.value;
+    const email = emailInput?.value;
+    const phone = document.getElementById("phone")?.value.trim();
+    const status = "booked";
 
-    if (loggedInUser) {
-
-        const userData = JSON.parse(loggedInUser);
-        bookAppointment(firstName, lastName, email, phone, dob, bookingDate);
-    } else {
-        console.log("No logged-in user found in session storage.");
-        alert("Please log in to access this page.");
-        // Redirect to login page
-        window.location.href = "login.html";
-    }
+    const appointmentData = {
+        patientId,
+        doctorId,
+        date,
+        firstName,
+        lastName,
+        email,
+        phone,
+        status
+    };
+    bookAnAppointment(appointmentData);
 });
+
+// book appointment api call
+const bookAnAppointment = async (appointmentData) => {
+    try {
+        const res = await fetch("http://localhost:9000/api/appointments", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}` // if required
+            },
+            body: JSON.stringify(appointmentData)
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+            alert("Appointment booked successfully!");
+            appointmentForm.reset(); // Optional: clear form
+        } else {
+            alert("Failed to book appointment: " + result.message);
+        }
+    } catch (error) {
+        console.error("Error booking appointment:", error);
+        alert("Something went wrong!");
+    }
+}
+

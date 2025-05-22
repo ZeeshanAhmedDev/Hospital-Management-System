@@ -2,6 +2,7 @@
 // Main app initialization placeholder
 console.log("App initialized");
 import { PATIENT_API } from "../APIsServices.js";
+import getDoctors from "../utils/doctorList.js";
 import { contentData } from "./contentData.js";
 
 // Initialize the carousel
@@ -192,7 +193,8 @@ const loadPatientAppointment = async() => {
 
         const patientName = `${appointment.firstName} ${appointment.lastName} `
         const doctorId = appointment.doctorId;
-        const doctorName = await getDoctors(doctorId, "booked");
+       // const doctorName = await getDoctors(doctorId, "booked");
+        const doctorName = await getDoctors(doctorId, "booked", token);
         const statusText = appointment.status || "Pending";
         const isCanceled = statusText.toLowerCase() === "canceled";
 
@@ -339,7 +341,8 @@ const loadBookedAppointment = async () => {
         appointments.forEach(async(appointment, index) => {
             const tr = document.createElement("tr");
             const doctorId = appointment.doctorId;
-            const doctorName = await getDoctors(doctorId, "booked");
+            //const doctorName = await getDoctors(doctorId, "booked");
+            const doctorName = await getDoctors(doctorId, "booked", token);
 
             // Determine status styling
             const statusText = appointment.status || "Pending";
@@ -417,8 +420,9 @@ const loadBookedAppointment = async () => {
     }
 
 }
+//TODO: clean up
 // add new appointment
-const loadAppointmentBooking = () => {
+/* const loadAppointmentBooking = () => {
     const appointmentForm = document.getElementById("appointmentForm");
     if (!appointmentForm) {
         console.error("Appointment form not found!");
@@ -496,7 +500,7 @@ const bookAnAppointment = async(appointmentData) => {
         console.error("Error booking appointment:", error);
         alert("Something went wrong!");
     }
-}
+} */
 
 // get all appointments
 const getAllAppointment = async () => {
@@ -521,7 +525,8 @@ const getAllAppointment = async () => {
 //  two use case. 
 // one in showing doctor 
 // another in showing doctor name
-const getDoctors = async (doctorSelect, type) => {
+//TODO: Clean up
+/* const getDoctors = async (doctorSelect, type) => {
     try {
         const res = await fetch('http://localhost:8000/api/staff/all-stuffs', {
             method: 'GET',
@@ -556,7 +561,7 @@ const getDoctors = async (doctorSelect, type) => {
         console.error("Failed to load doctors:", error);
     }
 };
-
+ */
 // conditionally  showing patient list on view-patients and manage bed views
 const fetchAndRenderPatients = async (viewType) => {
     let tableBody;
