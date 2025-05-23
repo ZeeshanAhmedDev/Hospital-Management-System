@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Status Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .service-card {
+      background: white;
+      border-left: 6px solid gray;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    }
+    .online { border-left-color: green; }
+    .offline { border-left-color: red; }
+    .status { font-weight: bold; }
+    .issue-box {
+      background: #fff3cd;
+      padding: 10px;
+      margin-top: 10px;
+      border-left: 4px solid orange;
+      display: none;
+    }
+    button {
+      padding: 6px 12px;
+      margin-top: 10px;
+      border: none;
+      background: #ff4c4c;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #c40000;
+    }
+    ul { margin-top: 5px; }
+    .toast {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #ff4c4c;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      z-index: 1000;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🛡️Status Dashboard</h1>
+<p style="text-align:center; font-size: 14px; color: #666;">Auto-refreshing every 10 seconds </p>
+<div id="dashboard"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+  const services = [
+    {
+      name: 'Auth Service',
+      baseUrl: 'http://localhost:5000/api',
+      testPath: '/auth/login',
+      port: 5000,
+      contact: '+391234242423',
+      dependsOn: [],
+      usedBy: ['Appointment Service', 'Patient Service', 'Staff Service'],
+      limitations: ["Can't access the system"]
+    },
+    {
+      name: 'Appointment Service',
+      baseUrl: 'http://localhost:9001/api',
+      testPath: '/appointments',
+      port: 9001,
+      contact: '+391234242423',
+      dependsOn: ['Patient Service', 'Staff Service'],
+      usedBy: [],
+      limitations: [
+        'Requires Staff Service to show list/select doctors',
+        'Requires Patient Service to fetch patient info'
+        
+      ]
+    },
+    {
+      name: 'Patient Service',
+      baseUrl: 'http://localhost:7000/api/patients',
+      testPath: '/register',
+      port: 7000,
+      contact: '+391234242423',
+      dependsOn: [],
+      usedBy: ['Appointment Service'],
+      limitations: ['If down, Appointment Service can’t get patient info']
+    },
+    {
+      name: 'Staff Service',
+      baseUrl: 'http://localhost:8001/api/staff',
+      testPath: '/all-stuffs',
+      port: 8001,
+      contact: '+391234242423',
+      dependsOn: [],
+      usedBy: ['Appointment Service'],
+      limitations: ['If down, Appointment Service can’t get list doctors']
+    }
+  ];
+
+  let previousStatus = {};
+  let uptimeRecords = {};
+  let refreshInterval = null;
+
+  async function checkService(service) {
+    const start = performance.now();
+    try {
+      const res = await fetch(service.baseUrl + service.testPath, { method: 'GET' });
+      const ms = Math.round(performance.now() - start);
+      if (!uptimeRecords[service.name]) uptimeRecords[service.name] = { up: 0, total: 0 };
+      uptimeRecords[service.name].total++;
+      if (res.ok) uptimeRecords[service.name].up++;
+      return {
+        ...service,
+        status: res.ok ? 'Online' : 'Offline',
+        responseTime: `${ms} ms`,
+        error: res.ok ? null : `Error: HTTP ${res.status}`
+      };
+    } catch (err) {
+      if (!uptimeRecords[service.name]) uptimeRecords[service.name] = { up: 0, total: 0 };
+      uptimeRecords[service.name].total++;
+      return {
+        ...service,
+        status: 'Offline',
+        responseTime: '-',
+        error: err.message
+      };
+    }
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 4000);
+  }
+
+  function logHistory(serviceName, status) {
+    const log = JSON.parse(localStorage.getItem('serviceLogs') || '[]');
+    log.push({ time: new Date().toLocaleString(), service: serviceName, status });
+    localStorage.setItem('serviceLogs', JSON.stringify(log));
+  }
+
+  async function renderDashboard() {
+    const container = document.getElementById('dashboard');
+    container.innerHTML = '';
+
+    const results = await Promise.all(services.map(checkService));
+
+    results.forEach(service => {
+      const div = document.createElement('div');
+      div.className = `service-card ${service.status === 'Online' ? 'online' : 'offline'}`;
+
+     
+      if (previousStatus[service.name] && previousStatus[service.name] !== service.status) {
+        showToast(`${service.name} is now ${service.status}`);
+        logHistory(service.name, service.status);
+      }
+      previousStatus[service.name] = service.status;
+
+      const uptimePercent = uptimeRecords[service.name] ?
+        Math.round((uptimeRecords[service.name].up / uptimeRecords[service.name].total) * 100) : 0;
+
+      div.innerHTML = `
+        <h3>${service.name} (Port: ${service.port})</h3>
+        <p>Status: <strong class="status">${service.status}</strong></p>
+        <p>Response Time: ${service.responseTime}</p>
+        <p>Uptime: ${uptimePercent}%</p>
+        ${service.error ? `<p style="color:red;"><strong>Error:</strong> ${service.error}</p>` : ''}
+        <p>Contact: ${service.contact}</p>
+        ${service.status === 'Offline' ? `<button onclick="toggleIssues('issue-${service.port}')">Show Issue Details</button>` : ''}
+        <div class="issue-box" id="issue-${service.port}">
+          <p><strong>Limitations of ${service.name}:</strong></p>
+          <ul>${service.limitations.map(item => `<li>${item}</li>`).join('')}</ul>
+          <p><strong>Depends On:</strong> ${service.dependsOn.length ? service.dependsOn.join(', ') : 'None'}</p>
+          <p><strong>Used By:</strong> ${service.usedBy.length ? service.usedBy.join(', ') : 'None'}</p>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function toggleIssues(id) {
+    const box = document.getElementById(id);
+    const isOpen = box.style.display === 'block';
+    box.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) {
+      clearInterval(refreshInterval);
+    } else {
+      if (!document.querySelector('.issue-box[style*="block"]')) {
+        refreshInterval = setInterval(renderDashboard, 1000000);
+      }
+    }
+  }
+
+  renderDashboard();
+  refreshInterval = setInterval(renderDashboard, 1000000);
+</script>
+
+</body>
+</html>
