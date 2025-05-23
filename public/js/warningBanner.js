@@ -1,7 +1,7 @@
-const STATUS_PAGE_URL = "http://127.0.0.1:3000/Hospital-Management-System-main/public/status.html";
+const STATUS_PAGE_URL = "./status.html";
 
 
-// List of service health-checkable endpoints based on your Postman collection
+
 const SERVICE_URLS = [
   "http://localhost:5000/api/auth/login",              // Auth Service
   "http://localhost:6000/api/appointments",            // Appointment Service
@@ -26,7 +26,7 @@ async function checkServicesHealth() {
 
     if (hasFailures) showWarningBanner();
   } catch (error) {
-    showWarningBanner(); // Catch total fetch failure
+    showWarningBanner(); 
   }
 }
 

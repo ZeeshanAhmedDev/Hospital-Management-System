@@ -61,7 +61,7 @@
 <body>
 
 <h1>🛡️ Microservices Status Dashboard</h1>
-<p style="text-align:center; font-size: 14px; color: #666;">Auto-refreshing every 10 seconds (Paused when viewing issues)</p>
+<p style="text-align:center; font-size: 14px; color: #666;">Auto-refreshing every 10 seconds</p>
 <div id="dashboard"></div>
 <div id="toast" class="toast"></div>
 
@@ -74,21 +74,20 @@
       port: 5000,
       contact: '+880-1111-111111',
       dependsOn: [],
-      usedBy: ['Appointment Service'],
-      limitations: ['JWT secret must be set', 'Database must be connected']
+      usedBy: ['Appointment Service', 'Patient Service', 'Staff Service'],
+      limitations: ['No one can access']
     },
     {
       name: 'Appointment Service',
-      baseUrl: 'http://localhost:6001/api',
+      baseUrl: 'http://localhost:9000/api',
       testPath: '/appointments',
       port: 9001,
       contact: '+880-2222-222222',
       dependsOn: ['Patient Service', 'Staff Service'],
-      usedBy: [],
+      usedBy: ['Auth Service'],
       limitations: [
         'Requires Staff Service to list/select doctors',
-        'Requires Patient Service to fetch patient info',
-        'Depends on internal booking DB'
+        'Requires Patient Service to fetch patient info'
       ]
     },
     {
@@ -97,9 +96,9 @@
       testPath: '/register',
       port: 7000,
       contact: '+880-3333-333333',
-      dependsOn: [],
+      dependsOn: ['Auth Service'],
       usedBy: ['Appointment Service'],
-      limitations: ['Requires MongoDB connection', 'Sensitive data handling']
+      limitations: ['If down, Appointment Service can’t show list patients']
     },
     {
       name: 'Staff Service',
@@ -109,7 +108,7 @@
       contact: '+880-4444-444444',
       dependsOn: [],
       usedBy: ['Appointment Service'],
-      limitations: ['If down, Appointment Service can’t list doctors', 'Database must be active']
+      limitations: ['If down, Appointment Service can’t show list doctors']
     }
   ];
 
