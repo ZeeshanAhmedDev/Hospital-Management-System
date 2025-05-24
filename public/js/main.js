@@ -1,6 +1,4 @@
 
-// Main app initialization placeholder
-console.log("App initialized");
 import { PATIENT_API } from "../APIsServices.js";
 import getDoctors from "../utils/doctorList.js";
 import { contentData } from "./contentData.js";
@@ -13,14 +11,16 @@ const carousel = new bootstrap.Carousel(myCarousel, {
 });
 
 // Logout Functionality
-const logoutBtn = document.getElementById("logoutButton");
-if (logoutBtn) {
-    logoutBtn.addEventListener("click", function () {
-        // Clear session storage
-        sessionStorage.clear();
-        // Redirect to login page
-        window.location.href = "login.html";
-    });
+const logOut = () => {
+    const logoutBtn = document.getElementById("logoutButton");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", function () {
+            // Clear session storage
+            sessionStorage.clear();
+            // Redirect to login page
+            window.location.href = "login.html";
+        });
+    }
 }
 
 
@@ -40,6 +40,24 @@ const loadPatientSideBars = () => {
             document.getElementById('innerController').innerHTML = data;
             // Initialize sidebar
             //initializeSidebarNavigation();
+        }).catch(err => console.log("Error loading sidebar bar: " + err));
+}
+
+const loadPatientNavigation = () => {
+    fetch('nav/navPatient.html')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('nav-wrapper').innerHTML = data;
+            logOut();
+        }).catch(err => console.log("Error loading sidebar bar: " + err));
+}
+
+const loadStaffNavigation = () => {
+    fetch('nav/navStaff.html')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('nav-wrapper').innerHTML = data;
+            logOut();
         }).catch(err => console.log("Error loading sidebar bar: " + err));
 }
 
@@ -71,16 +89,20 @@ const loadEditBedModal = () => {
 if (loggedInUser) {
     if (userData?.user?.role === "Patient") {
         loadPatientSideBars();
+        loadPatientNavigation();
     }
     else {
         loadStaffSideBars();
+        loadStaffNavigation();
     }
+    
 } else {
     console.log("No logged-in user found in session storage.");
-    alert("Please log in to access this page.");
+   // alert("Please log in to access this page.");
     // Redirect to login page
     window.location.href = "login.html";
 }
+
 
 // controlling sidebars
 const initializeSidebarNavigation = () => {
@@ -135,10 +157,10 @@ const updateContentAndInitialize = (section) => {
         //loadAppointmentBooking();
     }
     else if (section === "manageappointments") {
-        loadBookedAppointment();
+        //loadBookedAppointment();
     }
     else if (section === "medicalrecords") {
-        loadMedicalRecords();
+        //loadMedicalRecords();
     }
     else if (section === "patientappointments") {
         loadPatientAppointment();
@@ -262,6 +284,8 @@ const loadPatientAppointment = async() => {
     });
 }
 // load medical records for patients
+//TODO: clean up
+/* 
 const loadMedicalRecords = () => {
     const medicalRecordsTable = document.querySelector("table.records-table tbody");
     if (!medicalRecordsTable) {
@@ -316,7 +340,7 @@ const fetchMedicalRecords = async (tbody) => {
             tbody.innerHTML = `<tr><td colspan="4" class="text-danger text-center">Failed to load records.</td></tr>`;
         }
     }
-}
+} */
 
 //TODO: method cleanup
 // load specific user appointment

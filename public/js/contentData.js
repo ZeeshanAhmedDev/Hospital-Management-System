@@ -218,26 +218,6 @@ const contentData = {
                     </div>
                     </div>
             `,
-    medicalrecords: `
-                
-                <h2 class="mb-4">Patient Medical Records</h2>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover records-table">
-                        <thead class="table-primary">
-                        <tr>
-                            <th>Diagnosis</th>
-                            <th>Treatment</th>
-                            <th>Doctor</th>
-                            <th>Date</th>
-                        </tr>
-                        </thead>
-                        <tbody id="recordsBody">
-
-                        <tr><td colspan="4" class="text-center">Loading records...</td></tr>
-                        </tbody>
-                    </table>
-                </div>  
-            `,
     patientappointments: `
             <h2>Manage Patient booked appointments</h2>
                 <table class="table table-hover patient-appointment-table">

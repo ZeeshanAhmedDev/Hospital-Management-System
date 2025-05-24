@@ -3,6 +3,17 @@ import { PATIENT_API } from '../APIsServices.js';
 const GET_RECORDS_URL = `${PATIENT_API.BASE_URL}${PATIENT_API.VIEW_MEDICAL_RECORDS}`;
 let allRecords = []; // for search filtering
 
+// Logout Functionality
+const logoutBtn = document.getElementById("logoutButton");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", function () {
+    // Clear session storage
+    sessionStorage.clear();
+    // Redirect to login page
+    window.location.href = "login.html";
+  });
+}
+
 // Fetch  medical records
 async function fetchMedicalRecords() {
   try {

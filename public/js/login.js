@@ -2,6 +2,12 @@ import { AUTHENTICATION_API } from "../APIsServices.js";
 
 const login =`${AUTHENTICATION_API.BASE_URL}${AUTHENTICATION_API.LOGIN}`;
 
+document.getElementById('togglePassword').addEventListener('click', function () {
+    const passwordInput = document.getElementById('password');
+    const type = passwordInput.type === "password" ? "text" : "password";
+    passwordInput.type = type;
+    this.textContent = type === "password" ? "👁️" : "😌";
+});
 
 document.getElementById("loginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
