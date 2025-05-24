@@ -1,17 +1,23 @@
- .navbar-custom {
-            background-color: #6f42c1; /* Custom purple color */
-        }
-        .navbar-custom .nav-link, .navbar-custom .navbar-brand {
-            color: #fff;
-        }
-        .navbar-custom .nav-link:hover {
-            color: #e9ecef;
-        }
-        .navbar-custom .btn-download {
-            background-color: #ffc107;
-            border: none;
-            color: #000;
-        }
-        .navbar-custom .btn-download:hover {
-            background-color: #e0a800;
-        }
+.navbar-custom {
+    background-color: #6f42c1;
+    /* Custom purple color */
+}
+
+.navbar-custom .nav-link,
+.navbar-custom .navbar-brand {
+    color: #fff;
+}
+
+.navbar-custom .nav-link:hover {
+    color: #e9ecef;
+}
+
+.navbar-custom .btn-download {
+    background-color: #ffc107;
+    border: none;
+    color: #000;
+}
+
+.navbar-custom .btn-download:hover {
+    background-color: #e0a800;
+}

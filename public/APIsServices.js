@@ -10,8 +10,6 @@ export const AUTHENTICATION_API = {
 // Patient Services BaseUrl API
 export const PATIENT_API = {
   BASE_URL: "http://localhost:7000/api/patients",
-  REGISTER: "/register",
-  LOGIN: "/login",
   GET_PROFILE: "/:id",
   UPDATE_PROFILE: "/:id",
   CREATE_MEDICAL_RECORDS: "/medicalRecords",
@@ -21,8 +19,9 @@ export const PATIENT_API = {
 // Staff Services BaseUrl API
 export const STAFF_API = {
   BASE_URL: "http://localhost:8000/api/staff",
-  REGISTER: "/register",
-  LOGIN: "/login",
+  ADD_DOCTOR: "/add-doctor",
+  ADMIT_PATIENT: "/admit",
+  ALL_STAFF: "/all-stuffs",
   GET_PROFILE: "/:id",
   UPDATE_PROFILE: "/:id",
   ASSIGN_WARDS: "/:id/assign-wards",
@@ -36,6 +35,7 @@ export const APPOINTMENTS_API = {
   EDIT_APPOINTMENT: "/appointments/:id",
   CANCEL_APPOINTMENT: "/appointments/:id",
   GET_APPOINTMENTS: "/appointments",
+  GET_SINGLE_PATIENT: "/appointments/patient",
 };
 
 
