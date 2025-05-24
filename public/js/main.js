@@ -1,5 +1,6 @@
 
 import { PATIENT_API } from "../APIsServices.js";
+import loadAddDoctor from "../controllers/addDoctor.js";
 import getDoctors from "../utils/doctorList.js";
 import { contentData } from "./contentData.js";
 
@@ -151,7 +152,7 @@ const updateContentAndInitialize = (section) => {
         loadStaffWardManagement();
     }
     else if (section === "addadoctor") {
-        loadAddDoctor();
+        loadAddDoctor(token);
     }
     else if (section === "bookappointments") {
         //loadAppointmentBooking();
@@ -283,250 +284,6 @@ const loadPatientAppointment = async() => {
         }
     });
 }
-// load medical records for patients
-//TODO: clean up
-/* 
-const loadMedicalRecords = () => {
-    const medicalRecordsTable = document.querySelector("table.records-table tbody");
-    if (!medicalRecordsTable) {
-        console.error("Table body not found!");
-        return;
-    }
-    fetchMedicalRecords(medicalRecordsTable);
-}
-
-const fetchMedicalRecords = async (tbody) => {
-    const GET_RECORDS_URL = `${PATIENT_API.BASE_URL}${PATIENT_API.VIEW_MEDICAL_RECORDS}`;
-    try {
-        const response = await fetch(GET_RECORDS_URL, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-
-        const records = await response.json();
-
-        if (!response.ok) {
-            alert(data.message || "Failed to fetch records.");
-            return;
-        }
-
-        //allRecords = data; // Save search filtering
-        //renderRecords(allRecords);
-
-        tbody.innerHTML = "";
-
-        if (!records.length) {
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center">No records found.</td></tr>`;
-            return;
-        }
-
-        records.forEach(record => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${record.diagnosis}</td>
-                <td>${record.treatment}</td>
-                <td>${record.doctor}</td>
-                <td>${new Date(record.date).toLocaleDateString()}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-    } catch (error) {
-        console.error("Error fetching medical records:", error);
-        tbody = document.getElementById("recordsBody");
-        if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="4" class="text-danger text-center">Failed to load records.</td></tr>`;
-        }
-    }
-} */
-
-//TODO: method cleanup
-// load specific user appointment
-/* const loadBookedAppointment = async () => {
-    const bookedAppointmentTable = document.querySelector("table.appointment-table tbody");
-    if (!bookedAppointmentTable) {
-        console.error("Table body not found!");
-        return;
-    }
-    // Clear existing rows
-    bookedAppointmentTable.innerHTML = "";
-    const patientId = userData?.user?._id;
-
-    try {
-        const res = await fetch(`http://localhost:9000/api/appointments/patient/${patientId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` // if using auth
-            }
-        });
-
-        const appointments = await res.json();
-        appointments.forEach(async(appointment, index) => {
-            const tr = document.createElement("tr");
-            const doctorId = appointment.doctorId;
-            //const doctorName = await getDoctors(doctorId, "booked");
-            const doctorName = await getDoctors(doctorId, "booked", token);
-
-            // Determine status styling
-            const statusText = appointment.status || "Pending";
-            const isCanceled = statusText.toLowerCase() === "canceled";
-            const statusClass = isCanceled ? "text-danger fw-bold" : "";
-
-            // Create table row content
-            tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${doctorName || "Unknown"}</td>
-                <td class="${statusClass}">${statusText}</td>
-                <td>${appointment.phone || ""}</td>
-                <td>${appointment.email || ""}</td>
-                <td>
-                    <button 
-                        class="btn btn-sm ${isCanceled ? "btn-secondary" : "btn-danger"} cancel-btn" 
-                        data-id="${appointment._id}" 
-                        ${isCanceled ? "disabled" : ""}
-                    >
-                        X
-                    </button>
-                </td>
-            `;
-
-            bookedAppointmentTable.appendChild(tr);
-        });
-
-
-        document.addEventListener("click", async (event) => {
-            if (event.target.classList.contains("cancel-btn")) {
-                const appointmentId = event.target.getAttribute("data-id");
-
-                if (!appointmentId) return;
-
-                const confirmed = confirm("Are you sure you want to cancel this appointment?");
-                if (!confirmed) return;
-
-                try {
-                    const res = await fetch(`http://localhost:9000/api/appointments/${appointmentId}`, {
-                        method: "PATCH",
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}` // Add your token here
-                        }
-                    });
-
-                    if (res.ok) {
-                        const data = await res.json();
-                        console.log("Appointment canceled:", data);
-
-                        // Update the status cell in the same row
-                        const row = event.target.closest("tr");
-                        const statusCell = row?.querySelector("td:nth-child(3)"); // Adjust index if needed
-                        if (statusCell) {
-                            statusCell.textContent = "canceled";
-                            statusCell.classList.add("text-danger", "fw-bold");
-                        }
-
-                        // Optionally disable the cancel button
-                        event.target.disabled = true;
-                        event.target.classList.remove("btn-danger");
-                        event.target.classList.add("btn-secondary");
-                    } else {
-                        const errorData = await res.json();
-                        console.error("Failed to cancel appointment:", errorData.message);
-                    }
-                } catch (error) {
-                    console.error("Error while cancelling appointment:", error);
-                }
-            }
-        });
-
-    } catch (err) {
-        console.error("Fetch failed:", err);
-    }
-
-} */
-//TODO: clean up
-// add new appointment
-/* const loadAppointmentBooking = () => {
-    const appointmentForm = document.getElementById("appointmentForm");
-    if (!appointmentForm) {
-        console.error("Appointment form not found!");
-        return;
-    }
-
-    const firstNameInput = document.getElementById("firstName");
-    if (firstNameInput && userData?.user?.firstName) {
-        firstNameInput.value = userData.user.firstName;
-        firstNameInput.disabled = true;
-    }
-
-    const lastNameInput = document.getElementById("lastName");
-    if (lastNameInput && userData?.user?.lastName) {
-        lastNameInput.value = userData.user.lastName;
-        lastNameInput.disabled = true;
-    }
-
-    const emailInput = document.getElementById("email");
-    if (emailInput && userData?.user?.email) {
-        emailInput.value = userData.user.email;
-        emailInput.disabled = true;
-    }
-
-    const doctorSelect = document.getElementById("doctorSelect");
-    getDoctors(doctorSelect, "booking"); // populate doctor dropdown
-
-    appointmentForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-
-        const patientId = userData?.user?._id;
-        const doctorId = doctorSelect?.value;
-        const date = document.getElementById("bookingDate")?.value.trim();
-        const firstName = firstNameInput?.value;
-        const lastName = lastNameInput?.value;
-        const email = emailInput?.value;
-        const phone = document.getElementById("phone")?.value.trim();
-        const status = "booked";
-
-        const appointmentData = {
-            patientId,
-            doctorId,
-            date,
-            firstName,
-            lastName,
-            email,
-            phone,
-            status
-        };
-        bookAnAppointment(appointmentData);
-    });
-};
-
-// book appointment api call
-const bookAnAppointment = async(appointmentData) => {
-    try {
-        const res = await fetch("http://localhost:9000/api/appointments", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}` // if required
-            },
-            body: JSON.stringify(appointmentData)
-        });
-
-        const result = await res.json();
-
-        if (res.ok) {
-            alert("Appointment booked successfully!");
-            appointmentForm.reset(); // Optional: clear form
-        } else {
-            alert("Failed to book appointment: " + result.message);
-        }
-    } catch (error) {
-        console.error("Error booking appointment:", error);
-        alert("Something went wrong!");
-    }
-} */
 
 // get all appointments
 const getAllAppointment = async () => {
@@ -546,48 +303,6 @@ const getAllAppointment = async () => {
     }
 };
 
-
-// Get All doctors.
-//  two use case. 
-// one in showing doctor 
-// another in showing doctor name
-//TODO: Clean up
-/* const getDoctors = async (doctorSelect, type) => {
-    try {
-        const res = await fetch('http://localhost:8000/api/staff/all-stuffs', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        const staffs = await res.json();
-        if (type === 'booked') {
-            // doctorSelect is assumed to be the doctor ID in this case
-            const doctor = staffs.find(staff =>
-                staff?.role?.toLowerCase() === "doctor" && staff._id === doctorSelect
-            );
-
-            return doctor ? (doctor.name) : "Unknown Doctor";
-        } else {
-            // Populate dropdown options
-            doctorSelect.innerHTML = '<option value="">Select a Doctor</option>'; // Default option
-
-            staffs.forEach((staff) => {
-                if (staff?.role?.toLowerCase() === "doctor") {
-                    const option = document.createElement("option");
-                    option.value = staff._id;
-                    option.textContent = staff.name || `${staff.firstName} ${staff.lastName}`;
-                    doctorSelect.appendChild(option);
-                }
-            });
-        }
-    } catch (error) {
-        console.error("Failed to load doctors:", error);
-    }
-};
- */
 // conditionally  showing patient list on view-patients and manage bed views
 const fetchAndRenderPatients = async (viewType) => {
     let tableBody;
@@ -1163,7 +878,7 @@ const editWardAndBeds = async (patientId) => {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}` // ✅ Add token here
+                        "Authorization": `Bearer ${token}` 
                     },
                     body: JSON.stringify({
                         ward: updatedWard,
@@ -1231,7 +946,7 @@ const admitPatientFunc = async (patientName, patientDob, patientPhone, wardSelec
 };
 
 
-const loadAddDoctor = () => {
+/* const loadAddDoctor = () => {
     const doctorForm = document.getElementById("addDoctorForm");
     if (!doctorForm) {
         console.error("Doctor form not found!");
@@ -1286,7 +1001,7 @@ const loadAddDoctor = () => {
             alert("An error occurred while adding the doctor.");
         }
     });
-}
+} */
 
 
 
