@@ -1,7 +1,9 @@
-const API_URL = "http://localhost:8000/api/staff";
+import { STAFF_API } from "../APIsServices.js";
+
+const API_URL = `${STAFF_API.BASE_URL}${STAFF_API.ADD_DOCTOR}`;
 
 export const addDoctor = async (doctorData, token) => {
-    const response = await fetch(`${API_URL}/add-doctor`, {
+    const response = await fetch(API_URL, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

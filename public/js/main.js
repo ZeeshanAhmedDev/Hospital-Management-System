@@ -1,6 +1,7 @@
 
 import { PATIENT_API } from "../APIsServices.js";
 import loadAddDoctor from "../controllers/addDoctor.js";
+import initializeFormSubmission from "../controllers/admitPatient.js";
 import getDoctors from "../utils/doctorList.js";
 import { contentData } from "./contentData.js";
 
@@ -141,7 +142,7 @@ const updateContentAndInitialize = (section) => {
     contentWrapper.innerHTML = contentData[section] || "<h1>Content Not Found</h1>";
 
     if (section === "admitpatient") {
-        initializeFormSubmission(); // Initialize form submission handling
+        initializeFormSubmission(token);
     } else if (section === "viewpatients") {
         fetchAndRenderPatients("ViewPatients");
         loadPatientModal();
@@ -154,48 +155,12 @@ const updateContentAndInitialize = (section) => {
     else if (section === "addadoctor") {
         loadAddDoctor(token);
     }
-    else if (section === "bookappointments") {
-        //loadAppointmentBooking();
-    }
-    else if (section === "manageappointments") {
-        //loadBookedAppointment();
-    }
-    else if (section === "medicalrecords") {
-        //loadMedicalRecords();
-    }
     else if (section === "patientappointments") {
         loadPatientAppointment();
     }
 };
 
 
-
-// Admit patient form submission
-const initializeFormSubmission = () => {
-    const admitForm = document.getElementById("admitForm");
-    if (!admitForm) {
-        console.error("Admit form not found!");
-        return;
-    }
-
-    admitForm.addEventListener("submit", (event) => {
-        event.preventDefault(); // Prevent the default form submission
-
-        // Get form values
-        const patientName = document.getElementById("patientName")?.value.trim();
-        const patientDob = document.getElementById("patientDob")?.value.trim();
-        const patientPhone = document.getElementById("patientPhone")?.value.trim();
-        const wardSelection = document.getElementById("wardSelection")?.value.trim();
-        const bedSelection = document.getElementById("bedSelection")?.value.trim();
-        // Validate form values (optional)
-        if (!patientName || !patientDob || !patientPhone || !wardSelection || !bedSelection) {
-            alert("Please fill out all fields.");
-            return;
-        }
-
-        admitPatientFunc(patientName, patientDob, patientPhone, wardSelection, bedSelection, admitForm);
-    });
-};
 
 // Load patient booked appointments
 const loadPatientAppointment = async() => {
@@ -906,104 +871,6 @@ const editWardAndBeds = async (patientId) => {
         alert("An error occurred while fetching patient data.");
     }
 };
-
-
-const admitPatientFunc = async (patientName, patientDob, patientPhone, wardSelection, bedSelection, admitForm) => {
-    const apiUrl = "http://localhost:8000/api/staff/admit";
-
-    try {
-        const response = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}` // ✅ Add Authorization header
-            },
-            body: JSON.stringify({
-                name: patientName,
-                dob: patientDob,
-                phone: patientPhone,
-                ward: wardSelection,
-                bed: bedSelection,
-                condition: "Admitted"
-            })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Failed to admit patient");
-        }
-
-        const result = await response.json();
-
-        admitForm.reset();
-        alert(result.message || "Patient Admitted Successfully");
-        console.log("Admitted patient:", result.patient);
-
-    } catch (error) {
-        console.error("Error admitting patient:", error);
-        alert("Error admitting patient: " + error.message);
-    }
-};
-
-
-/* const loadAddDoctor = () => {
-    const doctorForm = document.getElementById("addDoctorForm");
-    if (!doctorForm) {
-        console.error("Doctor form not found!");
-        return;
-    }
-
-    doctorForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const form = e.target;
-
-        // Get form values
-        const doctorName = document.getElementById("doctorName")?.value.trim();
-        const doctorEmail = document.getElementById("doctorEmail")?.value.trim();
-        const doctorPhone = document.getElementById("doctorPhone")?.value.trim();
-        const doctorAddress = document.getElementById("doctorAddress")?.value.trim();
-
-        if (!doctorName || !doctorEmail || !doctorPhone || !doctorAddress) {
-            alert("Please fill out all fields.");
-            return;
-        }
-
-
-        try {
-            const response = await fetch("http://localhost:8000/api/staff/add-doctor", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    name: doctorName,
-                    email: doctorEmail,
-                    phoneNumber: doctorPhone,
-                    address: doctorAddress,
-                    role: "doctor",
-                    schedule: [],
-                    wardsAssigned: []
-                }),
-            });
-
-            const result = await response.json();
-            console.log(result)
-
-            if (response.ok) {
-                alert("Doctor added successfully!");
-                doctorForm.reset();
-            } else {
-                alert(result.message || "Failed to add doctor.");
-            }
-        } catch (error) {
-            console.error("Error adding doctor:", error);
-            alert("An error occurred while adding the doctor.");
-        }
-    });
-} */
-
-
 
 
 

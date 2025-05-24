@@ -32,7 +32,6 @@ const loadAddDoctor = (token) => {
 
         try {
             const result = await addDoctor(doctorData, token);
-            console.log(result);
             alert("Doctor added successfully!");
             doctorForm.reset();
         } catch (error) {
