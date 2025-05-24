@@ -3,8 +3,12 @@ import { PATIENT_API } from "../APIsServices.js";
 import loadAddDoctor from "../controllers/addDoctor.js";
 import initializeFormSubmission from "../controllers/admitPatient.js";
 import { loadPatientAppointment } from "../controllers/patientAppointments.js";
+import { deletePatientById, getPatientById, updatePatient } from "../models/patientModel.js";
+import { addShift, assignWard, fetchAllStaffs, removeShiftFromStaff, removeWardFromStaff } from "../models/staffModel.js";
+import { calculateAge } from "../utils/calculateAge.js";
 import getDoctors from "../utils/doctorList.js";
 import { contentData } from "./contentData.js";
+import { renderStaffRows } from "./staffUI.js";
 
 // Initialize the carousel
 const myCarousel = document.querySelector('#carouselExampleIndicators');
@@ -100,7 +104,6 @@ if (loggedInUser) {
     }
     
 } else {
-    console.log("No logged-in user found in session storage.");
    // alert("Please log in to access this page.");
     // Redirect to login page
     window.location.href = "login.html";
@@ -180,17 +183,6 @@ const fetchAndRenderPatients = async (viewType) => {
 
 // fetching data from from firebase and populating it
 const fetchPatients = async (tableBody, viewType) => {
-
-    const calculateAge = (dob) => {
-        const birthDate = new Date(dob);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-        return age;
-    };
 
     try {
         const response = await fetch("http://localhost:8000/api/staff/admissions", {
@@ -278,6 +270,8 @@ const fetchPatients = async (tableBody, viewType) => {
     }
 };
 
+
+
 // Staff management booked or cancellation things
 const loadStaffWardManagement = async () => {
     let stuffTableBody = document.querySelector("table.staff-table tbody");
@@ -286,94 +280,9 @@ const loadStaffWardManagement = async () => {
         return;
     }
     try {
-        const res = await fetch('http://localhost:8000/api/staff/all-stuffs', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        const staffs = await fetchAllStaffs(token);
+        stuffTableBody.innerHTML = renderStaffRows(staffs)
 
-        const staffs = await res.json();
-        stuffTableBody.innerHTML = "";
-        let rows = "";
-
-        staffs.forEach(stuff => {
-            const { name, phoneNumber, wardsAssigned, schedule } = stuff;
-
-            // Format wards
-            const wards = wardsAssigned && wardsAssigned.length
-                ? wardsAssigned.map(w => `
-                <div class="ward-item d-flex justify-content-between align-items-center mb-1">
-                    <span>${w}</span>
-                    <button class="btn btn-outline-danger btn-remove-ward ms-2 p-0" style="font-size: 0.75rem; line-height: 1; width: 20px; height: 20px;" data-id="${stuff._id}" data-ward="${w}">×</button>
-
-                </div>
-            `).join("")
-                : "<div>No wards assigned</div>";
-
-            const scheduleHtml = schedule.length
-                ? schedule.map(s => {
-                    const d = new Date(s.date);
-                    const shiftId = `${stuff._id}-${s.date}-${s.shift}`.replace(/\W+/g, "");
-                    return `<div id="shift-${shiftId}" class="mb-2">
-                        ${d.toLocaleDateString("en-GB")}: <strong>${s.shift}</strong>
-                        <button
-                            class="btn btn-outline-danger btn-remove-shift ms-2 p-0"
-                            style="font-size: 0.75rem; line-height: 1; width: 20px; height: 20px;"
-                            data-staff="${stuff._id}" 
-                            data-date="${s.date}" 
-                            data-shift="${s.shift}"
-                            >
-                            ×
-                        </button>
-
-                    </div>`;
-                }).join("")
-                : "<div>No shifts assigned</div>";
-
-            rows += `
-        <tr>
-          <td>
-            <div class="fw-bold">${name}</div>
-            <div class="text-muted small">${phoneNumber}</div>
-          </td>
-          <td>
-            <div id="wards-${stuff._id}">
-                ${wards}
-            </div>
-            <div class="dropdown d-inline">
-                <button class="btn btn-sm btn-outline-primary mt-2 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Update
-                </button>
-                <ul class="dropdown-menu ward-options" data-id="${stuff._id}">
-                    ${['General', 'ICU', 'HDU', 'Private', 'Maternity', 'Surgical', 'Orthopedic']
-                    .map(ward => `<li><a class="dropdown-item ward-item" href="#" data-ward="${ward}">${ward}</a></li>`)
-                    .join("")}
-                </ul>
-
-            </div>
-            </td>
-
-            <td class="shift-container">
-                ${scheduleHtml}
-                <form class="schedule-form mt-2" data-id="${stuff._id}">
-                    <input type="date" class="form-control form-control-sm d-inline-block w-auto me-2 schedule-date" required />
-                    <select class="form-select form-select-sm d-inline-block w-auto schedule-shift" required>
-                    <option value="" disabled>Shift</option>
-                    <option value="morning">Morning</option>
-                    <option value="afternoon">Afternoon</option>
-                    <option value="night">Night</option>
-                    </select>
-                    <button type="submit" class="btn btn-sm btn-primary ms-1">Add</button>
-                </form>
-                </td>
-        </tr>
-        `;
-        });
-
-
-        stuffTableBody.innerHTML = rows;
         document.querySelectorAll(".ward-options").forEach((menu) => {
             menu.addEventListener("click", (e) => {
                 if (e.target.classList.contains("ward-item")) {
@@ -438,140 +347,52 @@ const loadStaffWardManagement = async () => {
 // Wards adding functionality
 const updateWard = async (staffId, ward) => {
     try {
-        const container = document.getElementById(`wards-${staffId}`);
-        const currentWards = Array.from(container.querySelectorAll("div")).map(div => div.textContent.trim());
-
-        // Avoid duplicate assignment
-        if (currentWards.includes(ward)) {
-            alert("Ward already assigned.");
-            return;
-        }
-        if (currentWards.length > 2) {
-            alert("Maximum 3 wards can possible to assign.");
-            return;
-        }
-
-        // Call the backend API
-        const response = await fetch(`http://localhost:8000/api/staff/${staffId}/assign-wards`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({ wards: [ward] })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || "Failed to assign ward.");
-        }
-
-        if (currentWards.includes("No wards assigned")) {
-            currentWards.length = 0;
-        }
-        currentWards.push(ward);
-        container.innerHTML = currentWards.map(w => `<div>${w}</div>`).join("");
-
+        await assignWard(staffId, ward, token);
         alert("Ward assigned successfully.");
-    } catch (error) {
-        console.error("Error assigning ward:", error);
-        alert("Failed to assign ward. See console for details.");
+        location.reload();
+    } catch (err) {
+        console.error("Error assigning ward:", err);
+        alert("Failed to assign ward.");
     }
-}
-
+};
 
 // remove ward 
 const removeWard = async (staffId, ward) => {
     try {
-        const res = await fetch(`http://localhost:8000/api/staff/${staffId}/remove-ward`, {
-            method: 'PUT',
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({ ward })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            throw new Error(data.message || "Failed to remove ward");
-        }
-
-        // Remove from DOM
-        const wardElement = document.querySelector(`button[data-id="${staffId}"][data-ward="${ward}"]`).parentElement;
-        wardElement.remove();
-
-        // If container becomes empty, show fallback
-        const container = document.getElementById(`wards-${staffId}`);
-        if (!container.querySelector(".ward-item")) {
-            container.innerHTML = "<div>No wards assigned</div>";
-        }
-
+        await removeWardFromStaff(staffId, ward, token);
         alert("Ward removed successfully.");
+        location.reload();
     } catch (err) {
         console.error("Error removing ward:", err);
         alert("Failed to remove ward.");
     }
-}
+};
 
 // add new shift
 const updateShift = async (staffId, date, shift, dateInput, shiftSelect) => {
     try {
-        const response = await fetch(`http://localhost:8000/api/staff/${staffId}/manage-schedule`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({ date, shift })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) throw new Error(data.message || "Schedule update failed");
-
-        alert("Schedule added successfully. Reload to view changes.");
-        dateInput.value = "";
-        shiftSelect.value = "";
+        await addShift(staffId, date, shift, token);
+        alert("Shift added. Reloading...");
         location.reload();
-
     } catch (err) {
-        console.error("Error:", err);
-        alert("Failed to add schedule.");
+        console.error("Error adding shift:", err);
+        alert("Failed to add shift.");
     }
-}
+};
+
 // clear assigned shift per row
-const removeShift = async (staffId, shiftDate, shiftType) => {
+const removeShift = async (staffId, date, shiftType) => {
     try {
-        const response = await fetch(`http://localhost:8000/api/staff/${staffId}/remove-shift`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}` // only if you use auth
-            },
-            body: JSON.stringify({ date: shiftDate, shift: shiftType })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || "Failed to remove shift.");
-        }
-
-        const shiftId = `${staffId}-${shiftDate}-${shiftType}`.replace(/\W+/g, "");
-        const shiftElem = document.getElementById(`shift-${shiftId}`);
-        if (shiftElem) shiftElem.remove();
-        alert("Shift removed successfully.");
-    } catch (error) {
-        console.error("Error removing shift:", error);
+        await removeShiftFromStaff(staffId, date, shiftType, token);
+        alert("Shift removed.");
+        location.reload();
+    } catch (err) {
+        console.error("Error removing shift:", err);
         alert("Failed to remove shift.");
     }
 }
 // Edit Patient implementation
 const editPatient = async (patientId) => {
-    console.log(patientId)
     const editModalElement = document.getElementById("editPatientModal");
     if (!editModalElement) {
         alert("Patient modal not loaded. Please reload the page.");
@@ -580,18 +401,7 @@ const editPatient = async (patientId) => {
     const editModal = new bootstrap.Modal(editModalElement);
 
     try {
-        // Fetch patient data from API
-        const response = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        if (!response.ok) {
-            throw new Error("Patient not found!");
-        }
-        const patientData = await response.json();
+        const patientData = await getPatientById(patientId, token);
 
         // Populate modal fields 
         document.getElementById("editPatientName").value = patientData.name || "";
@@ -611,24 +421,10 @@ const editPatient = async (patientId) => {
                 dob: document.getElementById("editPatientDob").value.trim(),
                 phone: document.getElementById("editPatientPhone").value.trim(),
                 condition: document.getElementById("editTypeOfPatient").value.trim(),
-                // Optionally: ward, bed, etc. if you have those in the form
             };
 
             try {
-                const updateRes = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    },
-                    body: JSON.stringify(updatedData)
-                });
-
-                if (!updateRes.ok) {
-                    const errData = await updateRes.json();
-                    throw new Error(errData.message || "Update failed");
-                }
-
+                await updatePatient(patientId, updatedData, token)
                 alert("Patient details updated successfully!");
                 editModal.hide();
 
@@ -648,18 +444,7 @@ const editPatient = async (patientId) => {
 // Delete Patient implementation
 const deletePatient = async (patientId) => {
     try {
-        const res = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            }
-        });
-
-        if (!res.ok) {
-            throw new Error("Patient not found.");
-        }
-
-        const patient = await res.json();
+        const patient = await getPatientById(patientId, token);
 
         // Confirm deletion
         const confirmDelete = confirm(
@@ -667,18 +452,8 @@ const deletePatient = async (patientId) => {
         );
         if (!confirmDelete) return;
 
-        const deleteRes = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            }
-        });
+        await deletePatientById(patientId, token)
 
-        if (!deleteRes.ok) {
-            const errData = await deleteRes.json();
-            throw new Error(errData.message || "Failed to delete patient.");
-        }
         alert("Patient record deleted successfully!");
         const tableBody = document.querySelector("table.patient-table tbody");
         if (tableBody) fetchPatients(tableBody, "ViewPatients");
@@ -700,19 +475,7 @@ const editWardAndBeds = async (patientId) => {
     const editModal = new bootstrap.Modal(editBedElement);
 
     try {
-        // Fetch patient data from API
-        const res = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            }
-        });
-        if (!res.ok) {
-            alert("Patient not found!");
-            return;
-        }
-
-        const patientData = await res.json();
+        const patientData = await getPatientById(patientId, token);
 
         // Populate the modal with existing values
         document.getElementById("wardSelectionEdit").value = patientData.ward || "";
@@ -725,34 +488,21 @@ const editWardAndBeds = async (patientId) => {
         saveButton.onclick = async () => {
             const updatedWard = document.getElementById("wardSelectionEdit").value;
             const updatedBed = document.getElementById("bedSelectionEdit").value;
-
             if (!updatedWard || !updatedBed) {
                 alert("Please select both a ward and a bed.");
                 return;
             }
 
+            const updatedData = {
+                ward: updatedWard,
+                bed: updatedBed,
+            }
+
             try {
-                const updateRes = await fetch(`http://localhost:8000/api/staff/admissions/${patientId}`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}` 
-                    },
-                    body: JSON.stringify({
-                        ward: updatedWard,
-                        bed: updatedBed,
-                    }),
-                });
-
-                if (!updateRes.ok) {
-                    const errData = await updateRes.json();
-                    throw new Error(errData.message || "Failed to update ward/bed");
-                }
-
+                await updatePatient(patientId, updatedData, token)
                 alert("Ward and Bed updated successfully!");
                 editModal.hide();
                 fetchPatients(document.querySelector("table.manage-ward-table tbody"), "");
-
             } catch (err) {
                 console.error("Error updating ward and bed:", err);
                 alert("Failed to update ward and bed. Please try again.");
