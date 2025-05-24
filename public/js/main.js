@@ -2,6 +2,7 @@
 import { PATIENT_API } from "../APIsServices.js";
 import loadAddDoctor from "../controllers/addDoctor.js";
 import initializeFormSubmission from "../controllers/admitPatient.js";
+import { loadPatientAppointment } from "../controllers/patientAppointments.js";
 import getDoctors from "../utils/doctorList.js";
 import { contentData } from "./contentData.js";
 
@@ -156,115 +157,7 @@ const updateContentAndInitialize = (section) => {
         loadAddDoctor(token);
     }
     else if (section === "patientappointments") {
-        loadPatientAppointment();
-    }
-};
-
-
-
-// Load patient booked appointments
-const loadPatientAppointment = async() => {
-    const patientAppointmentTable = document.querySelector("table.patient-appointment-table tbody");
-    if (!patientAppointmentTable) {
-        console.error("Table body not found!");
-        return;
-    }
-    const appointments = await getAllAppointment();
-    if (!appointments || appointments.length === 0) {
-        patientAppointmentTable.innerHTML = `<tr><td colspan="6" class="text-center">No appointments found.</td></tr>`;
-        return;
-    }
-    patientAppointmentTable.innerHTML = ''; // Clear existing content
-
-    appointments.forEach(async(appointment, index) => {
-        const tr = document.createElement("tr");
-
-        const patientName = `${appointment.firstName} ${appointment.lastName} `
-        const doctorId = appointment.doctorId;
-       // const doctorName = await getDoctors(doctorId, "booked");
-        const doctorName = await getDoctors(doctorId, "booked", token);
-        const statusText = appointment.status || "Pending";
-        const isCanceled = statusText.toLowerCase() === "canceled";
-
-        tr.innerHTML = `
-            <td>${patientName || "Unknown"}</td>
-            <td>${doctorName || "Unknown"}</td>
-            <td class="${isCanceled ? 'text-danger fw-bold' : ''}">${statusText}</td>
-            <td>${appointment.phone || ""}</td>
-            <td>${appointment.email || ""}</td>
-            <td>
-                <button 
-                    class="btn btn-sm ${isCanceled ? 'btn-secondary' : 'btn-danger'} cancel-btn"
-                    data-id="${appointment._id}"
-                    ${isCanceled ? 'disabled' : ''}
-                >
-                    X
-                </button>
-            </td>
-        `;
-
-        patientAppointmentTable.appendChild(tr);
-    });
-    document.addEventListener("click", async (event) => {
-        if (event.target.classList.contains("cancel-btn")) {
-            const appointmentId = event.target.getAttribute("data-id");
-
-            if (!appointmentId) return;
-
-            const confirmed = confirm("Are you sure you want to cancel this appointment?");
-            if (!confirmed) return;
-
-            try {
-                const res = await fetch(`http://localhost:9000/api/appointments/${appointmentId}`, {
-                    method: "PATCH",
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` // Add your token here
-                    }
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    console.log("Appointment canceled:", data);
-
-                    // Update the status cell in the same row
-                    const row = event.target.closest("tr");
-                    const statusCell = row?.querySelector("td:nth-child(3)"); // Adjust index if needed
-                    if (statusCell) {
-                        statusCell.textContent = "canceled";
-                        statusCell.classList.add("text-danger", "fw-bold");
-                    }
-
-                    // Optionally disable the cancel button
-                    event.target.disabled = true;
-                    event.target.classList.remove("btn-danger");
-                    event.target.classList.add("btn-secondary");
-                } else {
-                    const errorData = await res.json();
-                    console.error("Failed to cancel appointment:", errorData.message);
-                }
-            } catch (error) {
-                console.error("Error while cancelling appointment:", error);
-            }
-        }
-    });
-}
-
-// get all appointments
-const getAllAppointment = async () => {
-    try {
-        const res = await fetch('http://localhost:9000/api/appointments', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        return await res.json();
-    } catch (error) {
-        console.error("Failed to load appointments:", error);
-        return [];
+        loadPatientAppointment(token);
     }
 };
 
